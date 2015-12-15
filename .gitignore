@@ -1,5 +1,7 @@
 dump
 
+*~
+
 *.tar
 *.zip
 *.tar.gz

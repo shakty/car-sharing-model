@@ -8,7 +8,6 @@ clear
 
 %% Create Networks
 
-
 % Nr Players.
 N = 20;
 
@@ -49,15 +48,25 @@ choices = zeros(N, T);
 strategies_carbus = ones(N, T);
 strategies_time = ones(N, T);
 
-% Model Variables.
+% Game Variables.
 
+% Cars.
+CAR_SHARE = 0.25;
+CAR_NUMBER = floor(N*CAR_SHARE);
+
+% Payoffs.
 PAYOFF_BUS = 50;
 PAYOFF_CAR = 30;
-CAR_SHARE = 0.5;
-CAR_NUMBER = floor(N*CAR_SHARE);
 
 SLOPE_CAR = (100 - PAYOFF_CAR) / 60;
 SLOPE_CAR_MISS = PAYOFF_CAR / 60;
+
+% Learning Variables.
+
+INCREASE_BUS = 20;
+INCREASE_TIME = 50;
+INCREASE_CAR_MISSED = 50;
+INCREASE_CAR_GOT = 50;
 
 for t = 1 : T
     
@@ -124,10 +133,10 @@ for t = 1 : T
             
             % Increase Car propensity.
             propensities_carbus(idx, CAR) = ...
-                propensities_carbus(idx, CAR) + 50;            
+                propensities_carbus(idx, CAR) + INCREASE_CAR_GOT;            
                 % TODO: could do an in increase proportional payoff.
                 
-                increase = 50;
+                increase = INCREASE_TIME;
                 for i = (time+1) : min(time+20, nr_strategies_time)
                     propensities_time(idx, i) = ...
                         propensities_time(idx, i) + increase;
@@ -139,10 +148,10 @@ for t = 1 : T
             
             % Increase Bus propensity.
             propensities_carbus(idx, BUS) = ...
-                propensities_carbus(idx, BUS) + 50;            
+                propensities_carbus(idx, BUS) + INCREASE_CAR_MISSED;            
                 % TODO: could do an in increase proportional to payoff.
             
-                increase = 50;
+                increase = INCREASE_TIME;
                 for i = (time-1) : max(time-20, 0)
                     propensities_time(idx, i) = ...
                         propensities_time(idx, i) + increase;
@@ -155,7 +164,7 @@ for t = 1 : T
             
             % Increase Bus propensity.
             propensities_carbus(idx, BUS) = ...
-                propensities_carbus(idx, BUS) + 20;
+                propensities_carbus(idx, BUS) + INCREASE_BUS;
             
         end
         
@@ -179,6 +188,8 @@ for t = 1 : T
         end
         
     end
-    
-    
+     
 end
+
+
+EQ = CAR_NUMBER - length(find(strategies_carbus(:,t) == 1))
