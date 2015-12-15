@@ -1,0 +1,7 @@
+dump
+
+*.tar
+*.zip
+*.tar.gz
+
+lsf.*
