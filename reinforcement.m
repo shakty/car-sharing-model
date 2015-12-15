@@ -63,10 +63,18 @@ SLOPE_CAR_MISS = PAYOFF_CAR / 60;
 
 % Learning Variables.
 
-INCREASE_BUS = 20;
-INCREASE_TIME = 50;
-INCREASE_CAR_MISSED = 50;
-INCREASE_CAR_GOT = 50;
+% Propensity increase for choosing bus.
+INCREASE_BUS = 5;
+
+% Propensity increase of neighboring times when choosing a car.
+% (The increment is deducted if the player does not find a car)
+INCREASE_TIME = 10;
+
+% Propensity increase for the BUS, when the player does not find a car.
+INCREASE_CAR_MISSED = 10;
+
+% Propensity incraese for the CAR, when the player finds a car.
+INCREASE_CAR_GOT = 10;
 
 for t = 1 : T
     
@@ -141,6 +149,9 @@ for t = 1 : T
                     propensities_time(idx, i) = ...
                         propensities_time(idx, i) + increase;
                     increase = increase - 2;
+                    if (increase <= 0) 
+                        break;
+                    end
                 end
             
             
@@ -191,5 +202,13 @@ for t = 1 : T
      
 end
 
+% Propensities.
+propensities_carbus
 
-EQ = CAR_NUMBER - length(find(strategies_carbus(:,t) == 1))
+carPlayers = find(strategies_carbus(:,t) == CAR);
+
+avgDepTimeCar = mean(strategies_time(carPlayers,t))
+
+% How close to equilibrium?
+EQ = CAR_NUMBER - length(carPlayers)
+
