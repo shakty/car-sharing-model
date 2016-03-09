@@ -11,7 +11,7 @@ clear
 % Nr Players.
 N = 20;
 
-% Time steps.
+% Timesteps.
 T = 30;
 
 % Strategies indexes.
@@ -163,7 +163,7 @@ for t = 1 : T
                 % TODO: could do an in increase proportional to payoff.
             
                 increase = INCREASE_TIME;
-                for i = max(time-20, 0) : (time-1)
+                for i = max(time-20, 1) : (time-1)
                     propensities_time(idx, i) = ...
                         propensities_time(idx, i) + increase;
                     increase = increase - 2;
