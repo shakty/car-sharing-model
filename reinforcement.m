@@ -30,16 +30,16 @@ avail_strategies_time = 0:60;
 % Nr available time strategies.
 nr_strategies_time = length(avail_strategies_time);
 
-% Initial propensities for each strategy of each player.
+% Initial propensities for car/bus for each strategy of each player.
 propensities_carbus = ones(N, nr_strategies);
 
-% Initial propensities for each strategy of each player.
+% Initial propensities for time for each strategy of each player.
 propensities_time = ones(N, nr_strategies_time);
 
 % Probabilities to choose car vs bus. (all equally probable at t=0).
 probabilities = ones(N, nr_strategies)*(1/nr_strategies);
 
-% Probabilities to choose a time. (all equally probable at t=0).
+% Probabilities to choose a time. (4all equally probable at t=0).
 probabilities_time = ones(N, nr_strategies_time)*(1/nr_strategies_time);
 
 % Store strategies, payoffs and choices over all rounds.
@@ -163,10 +163,13 @@ for t = 1 : T
                 % TODO: could do an in increase proportional to payoff.
             
                 increase = INCREASE_TIME;
-                for i = (time-1) : max(time-20, 0)
+                for i = max(time-20, 0) : (time-1)
                     propensities_time(idx, i) = ...
                         propensities_time(idx, i) + increase;
                     increase = increase - 2;
+                    if (increase <= 0) 
+                        break;
+                    end
                 end
                 
             
