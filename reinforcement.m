@@ -35,7 +35,7 @@ nr_strategies_time = length(avail_strategies_time);
 % Game Variables.
 
 % Cars.
-CAR_SHARE = 0.25;
+CAR_SHARE = 0.75;
 CAR_NUMBER = floor(N*CAR_SHARE);
 
 % Payoffs.
@@ -47,26 +47,42 @@ SLOPE_CAR_MISS = PAYOFF_CAR / 60;
 
 % Learning Variables.
 
+% Car vs Bus variables
+
 % Propensity increase for choosing bus.
 INCREASE_BUS = 5;
-
-% Propensity increase of neighboring times when getting a car.
-INCREASE_TIME = 10;
-
-% Propensity decrease of neighboring times when missing a car.
-DECREASE_TIME = 10;
-
-% How many neighboring times are updated by INCREASE_TIME.
-TIME_INTERVAL_INCREASE = 10;
-
-% How many neighboring times are updated by DECREASE_TIME.
-TIME_INTERVAL_DECREASE = 10;
 
 % Propensity increase for the BUS, when the player does not find a car.
 INCREASE_CAR_MISSED = 10;
 
 % Propensity incraese for the CAR, when the player finds a car.
 INCREASE_CAR_GOT = 10;
+
+% Time variables.
+
+% Propensity increase of neighboring times when getting a car.
+INCREASE_TIME = 20;
+
+% Propensity decrease of neighboring times when missing a car.
+DECREASE_TIME = 10;
+
+% How many neighboring times are updated by INCREASE_TIME.
+TIME_INTERVAL_INCREASE = 15;
+
+% How many neighboring times are updated by DECREASE_TIME.
+TIME_INTERVAL_DECREASE = 10;
+
+% How the interval-increase decays in further times.
+INCREASE_DECAY = 0.2;
+
+% How the interval-decrease decays in previous times.
+DECREASE_DECAY = 0.1;
+
+% If got car, propensities + INCREASE_SHOCK will be updated.
+INCREASE_SHOCK = 5;
+
+% If did not get car, propensities + DECREASE_SHOCK will be updated.
+DECREASE_SHOCK = 10;
 
 
 % Repetition settings.
@@ -175,9 +191,10 @@ for t = 1 : T
                 
                 
                 increase = INCREASE_TIME;
-                limit = min(time + TIME_INTERVAL_INCREASE, ...
+                upLimit = min(time + TIME_INTERVAL_INCREASE, ...
                             nr_strategies_time);
-                for i = (time+1) : limit
+                downLimit = time + INCREASE_SHOCK;
+                for i = downLimit : upLimit
                     propensities_time(idx, i) = ...
                         propensities_time(idx, i) + increase;
                     increase = increase - 2;
@@ -191,12 +208,13 @@ for t = 1 : T
             
             % Increase Bus propensity.
             propensities_carbus(idx, BUS) = ...
-                propensities_carbus(idx, BUS) + INCREASE_CAR_MISSED;            
+                propensities_carbus(idx, BUS) + INCREASE_CAR_MISSED;          
                 % TODO: could do an in increase proportional to payoff.
             
                 increase = DECREASE_TIME;                
-                limit = max(time - TIME_INTERVAL_DECREASE, 1);
-                for i = limit : (time-1)
+                downLimit = max(time - TIME_INTERVAL_DECREASE, 1);
+                upLimit = (time - DECREASE_SHOCK);
+                for i = downLimit : upLimit
                     propensities_time(idx, i) = ...
                         propensities_time(idx, i) + increase;
                     increase = increase - 2;
