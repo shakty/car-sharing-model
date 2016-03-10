@@ -35,6 +35,7 @@ SLOPE_CAR = (100 - PAYOFF_CAR) / 60;
 SLOPE_CAR_MISS = PAYOFF_CAR / 60;
 
 %% Input Parameters.
+%%%%%%%%%%%%%%%%%%%%
 
 % Save final outcome each simulation.
 simCount = args.simCount;
@@ -58,9 +59,8 @@ REPETITIONS = args.nRuns;
 increase_decay = INCREASE_DECAY * INCREASE_TIME;
 decrease_decay = DECREASE_DECAY * DECREASE_TIME;
 
-
-
-
+%% Data structures for all repetitions.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 rep_nCars = zeros(REPETITIONS, 1);
 rep_avgCarTime = zeros(REPETITIONS, 1);
@@ -91,6 +91,9 @@ choices = zeros(N, T);
 strategies_carbus = ones(N, T);
 strategies_time = ones(N, T);
 
+
+%% One simulation.
+%%%%%%%%%%%%%%%%%%
 
 for t = 1 : T
     
@@ -228,10 +231,6 @@ for t = 1 : T
 end
 
 
-
-
-end
-
 carPlayers = find(strategies_carbus(:,t) == CAR);
 avgDepTimeCar = mean(strategies_time(carPlayers,t));
 
@@ -242,6 +241,16 @@ rep_propensities_carbus(:,:,r) = propensities_carbus;
 rep_propensities_time(:,:,r) = propensities_time;
 
 
+end
+
+
+% Stats.
+
+avgCar = mean(rep_nCars)
+% How close to equilibrium?
+EQ = CAR_NUMBER - avgCar
+
+avgDepTimeCar = mean(rep_avgCarTime)
 
 % dataFileName = ['./clusters_macro_' simName '.csv'];
 % fid = fopen(dataFileName, 'a');
