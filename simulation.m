@@ -37,8 +37,11 @@ SLOPE_CAR_MISS = PAYOFF_CAR / 60;
 %% Input Parameters.
 %%%%%%%%%%%%%%%%%%%%
 
-% Save final outcome each simulation.
+simName = args.simName;
 simCount = args.simCount;
+
+OUT_DIR = [ args.dumpDir int2str(simCount) '/' ];
+mkdir(OUT_DIR);
 
 CAR_NUMBER = args.CAR_NUMBER;
 PAYOFF_BUS = args.PAYOFF_BUS;
@@ -228,50 +231,58 @@ for t = 1 : T
         
     end
     
+    
+    
+    
+    
+end
+
+fileName = [OUT_DIR 'times_' int2str(simCount) '.csv'];
+csvwrite(fileName, strategies_time);
+ 
+
+% carPlayers = find(strategies_carbus(:,t) == CAR);
+% avgDepTimeCar = mean(strategies_time(carPlayers,t));
+% 
+% rep_nCars(r) = length(carPlayers);
+% rep_avgCarTime(r) = avgDepTimeCar;
+% rep_depCarTime(r,:) = strategies_time(:,t);
+% rep_propensities_carbus(:,:,r) = propensities_carbus;
+% rep_propensities_time(:,:,r) = propensities_time;
+
+
 end
 
 
-carPlayers = find(strategies_carbus(:,t) == CAR);
-avgDepTimeCar = mean(strategies_time(carPlayers,t));
+% % Stats.
+% 
+% avgCar = mean(rep_nCars)
+% % How close to equilibrium?
+% EQ = CAR_NUMBER - avgCar
+% 
+% avgDepTimeCar = mean(rep_avgCarTime)
 
-rep_nCars(r) = length(carPlayers);
-rep_avgCarTime(r) = avgDepTimeCar;
-rep_depCarTime(r,:) = strategies_time(:,t);
-rep_propensities_carbus(:,:,r) = propensities_carbus;
-rep_propensities_time(:,:,r) = propensities_time;
-
-
-end
-
-
-% Stats.
-
-avgCar = mean(rep_nCars)
-% How close to equilibrium?
-EQ = CAR_NUMBER - avgCar
-
-avgDepTimeCar = mean(rep_avgCarTime)
-
-% dataFileName = ['./clusters_macro_' simName '.csv'];
 % fid = fopen(dataFileName, 'a');
 % 
-%       %% Param
+% %% Param
 % 
-%     headers = {
-%         'simname', ...
-%         'simcount', ...
-%         'run', ...
-%         'car.number', ...
-%         'bus.payoff', ...
-%         'round', ...
-%         '
+% headers = {
+%     'simname', ...
+%     'simcount', ...
+%     'run', ...
+%     'car.number', ...
+%     'bus.payoff', ...
+%     'round', ...
+%     'avg.car.n', ...
+%     'avg.car.time' ...
+% };
 % 
-%  
-%                 
+% write_csv_headers(fileName, headers);
+                
+
 % csv_string = sprintf('"%s",%u,%u,%u,%u,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.1f,%.4f,%.4f,%.4f', ... 
 %         simname, ...
-%         obj.simnameidx, ...
-%         obj.run, ... 
+%         simCount
 %         t, ...
 %         obj.cluster_count, ...
 %         obj.avgcoverage, ...

@@ -32,6 +32,14 @@ compLSF = 2;
 %% Start Vectorization of Parameters Sets
 fprintf('\nStarting...\n');
 
+folderName = [ dumpDir simName '/' ];
+
+if (exist(folderName,'dir') ~=0)    
+   error('Dump directory already exists');
+end
+
+mkdir(folderName);
+
 simCount = 1;
 
 % Nest several loops to simulate parameter sets.
@@ -93,7 +101,9 @@ for i1=1:length(CAR_NUMBER)
             end
             
             paramsObj = struct( ...
+                'simName', simName, ...
                 'simCount', simCount, ...
+                'dumpDir', folderName, ...
                 'nRuns', nRuns, ...
                 'seed', seed, ...
                 'CAR_NUMBER', my_CAR_NUMBER, ...
