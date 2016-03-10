@@ -6,6 +6,8 @@ close all
 clear
 clc
 
+dbstop if error
+
 %% Add other directories to path
 path(path,'util/'); % Help functions
 

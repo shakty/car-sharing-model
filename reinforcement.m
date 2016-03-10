@@ -177,17 +177,19 @@ for t = 1 : T
             else
                 choseCarMissed = 1;
                 payoff = PAYOFF_CAR - (SLOPE_CAR * time);
-            end                            
+            end
+            % Difference from BUS payoff and what received by choosing car.
+            diffFromBus = abs(PAYOFF_BUS - payoff);
         end        
         
         payoffs(player, t) = payoff;
         
-        if (choseCarGotCar == 1)
+        if (choseCarGotCar == 1)            
             
             % Increase Car propensity.
             propensities_carbus(idx, CAR) = ...
-                propensities_carbus(idx, CAR) + INCREASE_CAR_GOT;            
-                % TODO: could do an in increase proportional payoff.
+                propensities_carbus(idx, CAR) + diffFromBus;            
+                % propensities_carbus(idx, CAR) + INCREASE_CAR_GOT;    
                 
                 
                 increase = INCREASE_TIME;
@@ -208,8 +210,8 @@ for t = 1 : T
             
             % Increase Bus propensity.
             propensities_carbus(idx, BUS) = ...
-                propensities_carbus(idx, BUS) + INCREASE_CAR_MISSED;          
-                % TODO: could do an in increase proportional to payoff.
+                propensities_carbus(idx, BUS) + diffFromBus;     
+                % propensities_carbus(idx, BUS) + INCREASE_CAR_MISSED;     
             
                 increase = DECREASE_TIME;                
                 downLimit = max(time - TIME_INTERVAL_DECREASE, 1);

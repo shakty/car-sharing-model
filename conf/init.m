@@ -32,7 +32,7 @@ INCREASE_BUS = 5;
 INCREASE_CAR_MISSED = 20;
 
 % Propensity incraese for the CAR, when the player finds a car.
-INCREASE_CAR_GOT = 10;
+INCREASE_CAR_GOT = 30;
 
 % Time variables.
 

@@ -75,8 +75,6 @@ DECREASE_SHOCK = args.DECREASE_SHOCK;
 
 REPETITIONS = args.nRuns;
 
-increase_decay = INCREASE_DECAY * INCREASE_TIME;
-decrease_decay = DECREASE_DECAY * DECREASE_TIME;
 
 %% Data structures for all repetitions.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -172,19 +170,30 @@ for t = 1 : T
                 choseCarMissed = 1;
                 payoff = PAYOFF_CAR - (SLOPE_CAR * time);
             end
+            
+            % Difference from BUS payoff and what received by choosing car.
+            diffFromBus = payoff - PAYOFF_BUS;
         end
         
         payoffs(idx, t) = payoff;
         
         if (choseCarGotCar == 1)
             
-            % Increase Car propensity.
-            propensities_carbus(idx, CAR) = ...
-                propensities_carbus(idx, CAR) + INCREASE_CAR_GOT;
-            % TODO: could do an in increase proportional payoff.
+            % If payoff of car is greater than bus payoff increase
+            % the propensity of taking the car, otherwise just increase
+            % the propensity of leaving later.
+            
+            if (diffFromBus > 0)
+                 % Increase Car propensity.
+                 propensities_carbus(idx, CAR) = ...
+                     propensities_carbus(idx, CAR) + diffFromBus;
+                     % propensities_carbus(idx, CAR) + INCREASE_CAR_GOT;           
+            end
             
             
-            increase = INCREASE_TIME;
+            increase = INCREASE_TIME * abs(diffFromBus);
+            increase_decay = INCREASE_DECAY * increase;
+            
             upLimit = min(time + TIME_INTERVAL_INCREASE, ...
                 nr_strategies_time);
             downLimit = time + INCREASE_SHOCK;
@@ -200,12 +209,17 @@ for t = 1 : T
             
         elseif (choseCarMissed == 1)
             
+            diffFromBus = abs(diffFromBus);
+            
             % Increase Bus propensity.
             propensities_carbus(idx, BUS) = ...
-                propensities_carbus(idx, BUS) + INCREASE_CAR_MISSED;
-            % TODO: could do an in increase proportional to payoff.
+                propensities_carbus(idx, BUS) + diffFromBus;
+                % propensities_carbus(idx, BUS) + INCREASE_CAR_MISSED;
             
-            increase = DECREASE_TIME;
+            
+            increase = DECREASE_TIME * diffFromBus;
+            decrease_decay = DECREASE_DECAY * increase;
+            
             downLimit = max(time - TIME_INTERVAL_DECREASE, 1);
             upLimit = (time - DECREASE_SHOCK);
             for i = downLimit : upLimit
