@@ -237,7 +237,7 @@ for t = 1 : T
     
 end
 
-fileName = [OUT_DIR 'times_' int2str(simCount) '.csv'];
+fileName = [OUT_DIR 'times_' int2str(r) '.csv'];
 csvwrite(fileName, strategies_time);
  
 

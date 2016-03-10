@@ -27,7 +27,7 @@ compLSF = 2;
 %% Modifying params locally.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
+nRuns = 10;
 
 %% Start Vectorization of Parameters Sets
 fprintf('\nStarting...\n');
