@@ -70,11 +70,11 @@ decrease_decay = DECREASE_DECAY * DECREASE_TIME;
 %% Data structures for all repetitions.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-rep_nCars = zeros(REPETITIONS, 1);
-rep_avgCarTime = zeros(REPETITIONS, 1);
-rep_depCarTime = zeros(REPETITIONS, N);
-rep_propensities_carbus = zeros(N, 2, REPETITIONS);
-rep_propensities_time = zeros(N, nr_strategies_time, REPETITIONS);
+% rep_nCars = zeros(REPETITIONS, 1);
+% rep_avgCarTime = zeros(REPETITIONS, 1);
+% rep_depCarTime = zeros(REPETITIONS, N);
+% rep_propensities_carbus = zeros(N, 2, REPETITIONS);
+% rep_propensities_time = zeros(N, nr_strategies_time, REPETITIONS);
 
 for r = 1 : REPETITIONS
 
@@ -95,7 +95,7 @@ probabilities_time = ones(N, nr_strategies_time)*(1/nr_strategies_time);
 
 % Store strategies, payoffs and choices over all rounds.
 payoffs = zeros(N, T);
-choices = zeros(N, T);
+gotCars = zeros(N, T);
 strategies_carbus = ones(N, T);
 strategies_time = ones(N, T);
 
@@ -154,6 +154,7 @@ for t = 1 : T
             time = strategies_time(idx, t);
             if (leftCars > 0)
                 choseCarGotCar = 1;
+                gotCars(idx, t) = 1;
                 leftCars = leftCars - 1;
                 payoff = PAYOFF_CAR + (SLOPE_CAR * time);
             else
@@ -211,9 +212,10 @@ for t = 1 : T
             
             % Increase Bus propensity.
             propensities_carbus(idx, BUS) = ...
-                propensities_carbus(idx, BUS) + INCREASE_BUS;
+                propensities_carbus(idx, BUS) + INCREASE_BUS;            
             
         end
+              
         
         % Update probabilities.
         
@@ -241,7 +243,30 @@ end
 
 if (DUMP)
     fileName = [OUT_DIR 'times_' int2str(r) '.csv'];
-    csvwrite(fileName, strategies_time);
+    
+    rounds = repmat((1:T)',N,1);
+    players = repmat(1:N, T, 1);    
+    reshaped_carbus = reshape(strategies_carbus, N*T, 1);
+    reshaped_times = reshape(strategies_time, N*T, 1);
+    reshaped_gotCars = reshape(gotCars, N*T, 1);
+    reshaped_payoffs = reshape(payoffs, N*T, 1);
+    
+    csvwrite_with_headers(fileName, [ ...
+        players(:), ...
+        rounds ...
+        reshaped_carbus ...
+        reshaped_times ...
+        reshaped_gotCars ...
+        reshaped_payoffs ...
+        ], ...
+        { ...
+        'player', ...
+        'round', ...
+        'decision', ...
+        'departure.time', ...
+        'got.car', ...
+        'payoff' ...
+    });
 end
 
 % carPlayers = find(strategies_carbus(:,t) == CAR);

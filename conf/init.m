@@ -29,15 +29,15 @@ PAYOFF_BUS = 50;
 INCREASE_BUS = 5;
 
 % Propensity increase for the BUS, when the player does not find a car.
-INCREASE_CAR_MISSED = 10;
+INCREASE_CAR_MISSED = 20;
 
 % Propensity incraese for the CAR, when the player finds a car.
-INCREASE_CAR_GOT = 140;
+INCREASE_CAR_GOT = 10;
 
 % Time variables.
 
 % Propensity increase of neighboring times when getting a car.
-INCREASE_TIME = 20;
+INCREASE_TIME = 10;
 
 % Propensity decrease of neighboring times when missing a car.
 DECREASE_TIME = 10;
