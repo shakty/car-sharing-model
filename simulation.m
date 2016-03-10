@@ -1,12 +1,10 @@
-clc
-close all
-clear
-
-% Open debugger if there is an error.
-% dbstop if error
+function [ output_args ] = simulation( args )
+%SIMULATION Summary of this function goes here
+%   Detailed explanation goes here
 
 
-%% Create Networks
+%% Rules of the game.
+%%%%%%%%%%%%%%%%%%%%%
 
 % Nr Players.
 N = 20;
@@ -29,68 +27,40 @@ avail_strategies_time = 0:60;
 
 % Nr available time strategies.
 nr_strategies_time = length(avail_strategies_time);
-
-
-
-% Game Variables.
-
-% Cars.
-CAR_SHARE = 0.75;
-CAR_NUMBER = floor(N*CAR_SHARE);
+% seed = args.seed;
 
 % Payoffs.
-PAYOFF_BUS = 50;
 PAYOFF_CAR = 30;
-
 SLOPE_CAR = (100 - PAYOFF_CAR) / 60;
 SLOPE_CAR_MISS = PAYOFF_CAR / 60;
 
-% Learning Variables.
-
-% Car vs Bus variables
-
-% Propensity increase for choosing bus.
-INCREASE_BUS = 5;
-
-% Propensity increase for the BUS, when the player does not find a car.
-INCREASE_CAR_MISSED = 10;
-
-% Propensity incraese for the CAR, when the player finds a car.
-INCREASE_CAR_GOT = 140;
-
-% Time variables.
-
-% Propensity increase of neighboring times when getting a car.
-INCREASE_TIME = 20;
-
-% Propensity decrease of neighboring times when missing a car.
-DECREASE_TIME = 10;
-
-% How many neighboring times are updated by INCREASE_TIME.
-TIME_INTERVAL_INCREASE = 15;
-
-% How many neighboring times are updated by DECREASE_TIME.
-TIME_INTERVAL_DECREASE = 10;
-
-% How the interval-increase decays in further times.
-INCREASE_DECAY = 0.2;
-
-% How the interval-decrease decays in previous times.
-DECREASE_DECAY = 0.1;
-
-% If got car, propensities + INCREASE_SHOCK will be updated.
-INCREASE_SHOCK = 5;
-
-% If did not get car, propensities + DECREASE_SHOCK will be updated.
-DECREASE_SHOCK = 10;
-
-
-% Repetition settings.
-
-% Number of times to re-run the model.
-REPETITIONS = 30;
+%% Input Parameters.
 
 % Save final outcome each simulation.
+simCount = args.simCount;
+
+CAR_NUMBER = args.CAR_NUMBER;
+PAYOFF_BUS = args.PAYOFF_BUS;
+INCREASE_BUS = args.INCREASE_BUS;
+INCREASE_CAR_GOT = args.INCREASE_CAR_GOT;                
+INCREASE_CAR_MISSED = args.INCREASE_CAR_MISSED;
+INCREASE_TIME = args.INCREASE_TIME;
+DECREASE_TIME = args.DECREASE_TIME;
+TIME_INTERVAL_INCREASE = args.TIME_INTERVAL_INCREASE;
+TIME_INTERVAL_DECREASE = args.TIME_INTERVAL_DECREASE;
+INCREASE_DECAY = args.INCREASE_DECAY;
+DECREASE_DECAY = args.DECREASE_DECAY;
+INCREASE_SHOCK = args.INCREASE_SHOCK;
+DECREASE_SHOCK = args.DECREASE_SHOCK;
+
+REPETITIONS = args.nRuns;
+
+increase_decay = INCREASE_DECAY * INCREASE_TIME;
+decrease_decay = DECREASE_DECAY * DECREASE_TIME;
+
+
+
+
 
 rep_nCars = zeros(REPETITIONS, 1);
 rep_avgCarTime = zeros(REPETITIONS, 1);
@@ -99,6 +69,7 @@ rep_propensities_carbus = zeros(N, 2, REPETITIONS);
 rep_propensities_time = zeros(N, nr_strategies_time, REPETITIONS);
 
 for r = 1 : REPETITIONS
+
 
 % Clear simulation data.
     
@@ -119,7 +90,7 @@ payoffs = zeros(N, T);
 choices = zeros(N, T);
 strategies_carbus = ones(N, T);
 strategies_time = ones(N, T);
-    
+
 
 for t = 1 : T
     
@@ -128,20 +99,20 @@ for t = 1 : T
         
         % Randomly draw a strategy according to the prob distribution.
         curStrategy_carbus = randsample(avail_strategies_carbus, ...
-                                        1, true, ...
-                                        probabilities(player,:));
+            1, true, ...
+            probabilities(player,:));
         
-                
+        
         % If CAR was chosen, choose the time.
         if (curStrategy_carbus == CAR)
-                                            
+            
             % Randomly draw a time strategy according to prob distribution.
             curStrategy_time = randsample(avail_strategies_time, ...
-                                          1, true, ...
-                                          probabilities_time(player,:));
+                1, true, ...
+                probabilities_time(player,:));
         else
             % Time for Bus (used for sorting).
-            curStrategy_time = -1;        
+            curStrategy_time = -1;
         end
         
         % Store chosen strategies.
@@ -161,15 +132,15 @@ for t = 1 : T
         choseBus = 0;
         
         idx = sorted_players(player);
-            
+        
         % BUS.
         if (strategies_carbus(idx, t) == BUS)
             payoff = PAYOFF_BUS;
-            choseBus = 1; 
-        
-        % CAR.
+            choseBus = 1;
+            
+            % CAR.
         else
-            time = strategies_time(idx, t);            
+            time = strategies_time(idx, t);
             if (leftCars > 0)
                 choseCarGotCar = 1;
                 leftCars = leftCars - 1;
@@ -177,8 +148,8 @@ for t = 1 : T
             else
                 choseCarMissed = 1;
                 payoff = PAYOFF_CAR - (SLOPE_CAR * time);
-            end                            
-        end        
+            end
+        end
         
         payoffs(player, t) = payoff;
         
@@ -186,45 +157,45 @@ for t = 1 : T
             
             % Increase Car propensity.
             propensities_carbus(idx, CAR) = ...
-                propensities_carbus(idx, CAR) + INCREASE_CAR_GOT;            
-                % TODO: could do an in increase proportional payoff.
-                
-                
-                increase = INCREASE_TIME;
-                upLimit = min(time + TIME_INTERVAL_INCREASE, ...
-                            nr_strategies_time);
-                downLimit = time + INCREASE_SHOCK;
-                for i = downLimit : upLimit
-                    propensities_time(idx, i) = ...
-                        propensities_time(idx, i) + increase;
-                    increase = increase - 2;
-                    if (increase <= 0) 
-                        break;
-                    end
+                propensities_carbus(idx, CAR) + INCREASE_CAR_GOT;
+            % TODO: could do an in increase proportional payoff.
+            
+            
+            increase = INCREASE_TIME;
+            upLimit = min(time + TIME_INTERVAL_INCREASE, ...
+                nr_strategies_time);
+            downLimit = time + INCREASE_SHOCK;
+            for i = downLimit : upLimit
+                propensities_time(idx, i) = ...
+                    propensities_time(idx, i) + increase;
+                increase = increase - increase_decay;
+                if (increase <= 0)
+                    break;
                 end
+            end
             
             
         elseif (choseCarMissed == 1)
             
             % Increase Bus propensity.
             propensities_carbus(idx, BUS) = ...
-                propensities_carbus(idx, BUS) + INCREASE_CAR_MISSED;          
-                % TODO: could do an in increase proportional to payoff.
+                propensities_carbus(idx, BUS) + INCREASE_CAR_MISSED;
+            % TODO: could do an in increase proportional to payoff.
             
-                increase = DECREASE_TIME;                
-                downLimit = max(time - TIME_INTERVAL_DECREASE, 1);
-                upLimit = (time - DECREASE_SHOCK);
-                for i = downLimit : upLimit
-                    propensities_time(idx, i) = ...
-                        propensities_time(idx, i) + increase;
-                    increase = increase - 2;
-                    if (increase <= 0) 
-                        break;
-                    end
+            increase = DECREASE_TIME;
+            downLimit = max(time - TIME_INTERVAL_DECREASE, 1);
+            upLimit = (time - DECREASE_SHOCK);
+            for i = downLimit : upLimit
+                propensities_time(idx, i) = ...
+                    propensities_time(idx, i) + increase;
+                increase = increase - decrease_decay;
+                if (increase <= 0)
+                    break;
                 end
-                
+            end
             
-        % Bus.
+            
+            % Bus.
         else
             
             % Increase Bus propensity.
@@ -238,10 +209,10 @@ for t = 1 : T
         sumPropensities = sum(propensities_carbus(idx, :));
         
         probabilities(idx, BUS) = propensities_carbus(idx, BUS) / ...
-                                  sumPropensities;
+            sumPropensities;
         probabilities(idx, CAR) = propensities_carbus(idx, CAR) / ...
-                                  sumPropensities;
-           
+            sumPropensities;
+        
         % Update time probabilities only if car was chosen.
         if (choseBus == 0)
             sumPropensities = sum(propensities_time(idx, :));
@@ -253,7 +224,12 @@ for t = 1 : T
         end
         
     end
-     
+    
+end
+
+
+
+
 end
 
 carPlayers = find(strategies_carbus(:,t) == CAR);
@@ -267,12 +243,42 @@ rep_propensities_time(:,:,r) = propensities_time;
 
 
 
+% dataFileName = ['./clusters_macro_' simName '.csv'];
+% fid = fopen(dataFileName, 'a');
+% 
+%       %% Param
+% 
+%     headers = {
+%         'simname', ...
+%         'simcount', ...
+%         'run', ...
+%         'car.number', ...
+%         'bus.payoff', ...
+%         'round', ...
+%         '
+% 
+%  
+%                 
+% csv_string = sprintf('"%s",%u,%u,%u,%u,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.1f,%.4f,%.4f,%.4f', ... 
+%         simname, ...
+%         obj.simnameidx, ...
+%         obj.run, ... 
+%         t, ...
+%         obj.cluster_count, ...
+%         obj.avgcoverage, ...
+%         obj.cumcoverage, ...
+%         obj.mean_cluster_speed, ...
+%         obj.sd_cluster_speed, ...
+%         obj.mean_cluster_move, ...
+%         obj.sd_cluster_move, ...
+%         obj.mean_cluster_size, ...
+%         obj.sd_cluster_size, ...
+%         obj.mean_from_truth, ...
+%         obj.sd_from_truth ...
+%         );
+%                 
+%     fprintf(fidClustersMacro,'%s\n', csv_string);
+
+        
 end
 
-% Stats.
-
-avgCar = mean(rep_nCars)
-% How close to equilibrium?
-EQ = CAR_NUMBER - avgCar
-
-avgDepTimeCar = mean(rep_avgCarTime)
