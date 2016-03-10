@@ -134,7 +134,7 @@ for t = 1 : T
                 probabilities_time(player,:));
         else
             % Time for Bus (used for sorting).
-            curStrategy_time = -1;
+            curStrategy_time = 0;
         end
         
         % Store chosen strategies.
@@ -174,7 +174,7 @@ for t = 1 : T
             end
         end
         
-        payoffs(player, t) = payoff;
+        payoffs(idx, t) = payoff;
         
         if (choseCarGotCar == 1)
             
@@ -257,10 +257,10 @@ if (DUMP)
     
     rounds = repmat((1:T)',N,1);
     players = repmat(1:N, T, 1);    
-    reshaped_carbus = reshape(strategies_carbus, N*T, 1);
-    reshaped_times = reshape(strategies_time, N*T, 1);
-    reshaped_gotCars = reshape(gotCars, N*T, 1);
-    reshaped_payoffs = reshape(payoffs, N*T, 1);        
+    reshaped_carbus = reshape(strategies_carbus', N*T, 1);
+    reshaped_times = reshape(strategies_time', N*T, 1);
+    reshaped_gotCars = reshape(gotCars', N*T, 1);
+    reshaped_payoffs = reshape(payoffs', N*T, 1);        
     car_levels = repmat(car_level, N*T, 1);
     bus_payoffs = repmat(PAYOFF_BUS, N*T, 1);
     sessions = repmat(simCount, N*T, 1);
