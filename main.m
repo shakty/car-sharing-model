@@ -28,17 +28,15 @@ compLSF = 2;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 nRuns = 10;
+DUMP = 1;
 
 %% Start Vectorization of Parameters Sets
 fprintf('\nStarting...\n');
 
-folderName = [ dumpDir simName '/' ];
+uniqueSimName = createSimName(simName, DUMP, dumpDir, 0);
 
-if (exist(folderName,'dir') ~=0)    
-   error('Dump directory already exists');
-end
+folderName = [ dumpDir uniqueSimName '/' ];
 
-mkdir(folderName);
 
 simCount = 1;
 
@@ -104,6 +102,7 @@ for i1=1:length(CAR_NUMBER)
                 'simName', simName, ...
                 'simCount', simCount, ...
                 'dumpDir', folderName, ...
+                'DUMP', DUMP, ...
                 'nRuns', nRuns, ...
                 'seed', seed, ...
                 'CAR_NUMBER', my_CAR_NUMBER, ...

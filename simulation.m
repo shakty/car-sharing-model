@@ -40,8 +40,12 @@ SLOPE_CAR_MISS = PAYOFF_CAR / 60;
 simName = args.simName;
 simCount = args.simCount;
 
-OUT_DIR = [ args.dumpDir int2str(simCount) '/' ];
-mkdir(OUT_DIR);
+DUMP = args.DUMP;
+
+if (DUMP)
+    OUT_DIR = [ args.dumpDir int2str(simCount) '/' ];
+    mkdir(OUT_DIR);
+end
 
 CAR_NUMBER = args.CAR_NUMBER;
 PAYOFF_BUS = args.PAYOFF_BUS;
@@ -56,6 +60,7 @@ INCREASE_DECAY = args.INCREASE_DECAY;
 DECREASE_DECAY = args.DECREASE_DECAY;
 INCREASE_SHOCK = args.INCREASE_SHOCK;
 DECREASE_SHOCK = args.DECREASE_SHOCK;
+
 
 REPETITIONS = args.nRuns;
 
@@ -232,14 +237,12 @@ for t = 1 : T
     end
     
     
-    
-    
-    
 end
 
-fileName = [OUT_DIR 'times_' int2str(r) '.csv'];
-csvwrite(fileName, strategies_time);
- 
+if (DUMP)
+    fileName = [OUT_DIR 'times_' int2str(r) '.csv'];
+    csvwrite(fileName, strategies_time);
+end
 
 % carPlayers = find(strategies_carbus(:,t) == CAR);
 % avgDepTimeCar = mean(strategies_time(carPlayers,t));
