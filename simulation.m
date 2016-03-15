@@ -54,11 +54,11 @@ PAYOFF_BUS = args.PAYOFF_BUS;
 CAR_NUMBER = args.CAR_NUMBER;
 
 if (CAR_NUMBER == 15)
-    car_level = 0.75;
+    car_level = 75;
 elseif (CAR_NUMBER == 10)
-    car_level = 0.5;
+    car_level = 50;
 else
-    car_level = 0.25;
+    car_level = 25;
 end
 
 
@@ -288,7 +288,7 @@ for t = 1 : T
             rho = referencePoints(idx);
             reward = payoff - rho;
             
-            if (reward < 0 )
+            if (reward <= 0 )
                 rho = (1 - wMinus) * rho + wMinus * payoff;
             else
                 rho = (1 - wPlus) * rho + wPlus * payoff;
@@ -323,6 +323,9 @@ for t = 1 : T
                 
                 propensities_carbus(idx, BUS) = max(upsilon, newProp);
                 
+                
+                % Time update.
+                
                 if (choseCarGotCar)
                     timeTarget = min(time + INCREASE_SHOCK, ...
                         nr_strategies_time);
@@ -330,25 +333,36 @@ for t = 1 : T
                     timeTarget = max(time - DECREASE_SHOCK, 1);
                 end
                 
+                % Making sure limits are within 1 and 61.
                 downLimit = max(timeTarget - TIME_INTERVAL_DECREASE,1);
                 upLimit = min(timeTarget + TIME_INTERVAL_DECREASE, ...
                     nr_strategies_time);
                 
-                
-                increase_unit = abs(reward) / (2 * TIME_INTERVAL_DECREASE);
-                
-                upToTarget = TIME_INTERVAL_DECREASE+1;
-                increases = increase_unit:increase_unit:increase_unit*upToTarget;
-                startIncreases = (upToTarget+1)-length(downLimit:timeTarget);
-                increases_down = increases(startIncreases:end);
+                if (reward)
+                    increase_unit = abs(ownStrategyReward) / ...
+                        (2 * TIME_INTERVAL_DECREASE);
+                    
+                    upToTarget = TIME_INTERVAL_DECREASE+1;
+                    increases = increase_unit:increase_unit:increase_unit*upToTarget;
+                    startIncreases = (upToTarget+1)-length(downLimit:timeTarget);
+                    increases_down = increases(startIncreases:end);
+                    
+                    lengthOtherStr = (length(increases_down) + length(upLimit:nr_strategies_time));
+                    otherReward = otherStrategyReward / lengthOtherStr;
+                else
+                    increases_down = zeros(upToTarget,1);
+                    otherReward = 0;
+                end
                 
                 ii = 0;
                 for i = 1:nr_strategies_time
                     
                     newProp = (1 - phi) * propensities_time(idx, i);
                     
-                    if (i >= downLimit && i <= timeTarget)
-                   
+                    if (i < downLimit)
+                        newProp = newProp + otherReward;
+                        
+                    elseif (i >= downLimit && i <= timeTarget)                   
                         ii = ii + 1;
                         increase = increases_down(ii);
                         newProp = newProp + increase;
@@ -356,6 +370,9 @@ for t = 1 : T
                     elseif (i > timeTarget && i < upLimit)
                         increase = increase - increase_unit;
                         newProp = newProp + increase;
+                        
+                    else
+                        newProp = newProp + otherReward;
                     end
                     
                     propensities_time(idx, i) = max(upsilon, newProp);
@@ -421,7 +438,7 @@ if (DUMP)
         'session', ...
         'repetition', ...
         'payoff.bus', ...
-        'car.level.num', ...
+        'car.level', ...
         'player', ...
         'round', ...
         'decision', ...

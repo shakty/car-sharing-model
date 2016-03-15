@@ -29,7 +29,7 @@ compLSF = 2;
 %% Modifying params locally.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-nRuns = 10;
+nRuns = 15;
 DUMP = 1;
 
 %% Start Vectorization of Parameters Sets
