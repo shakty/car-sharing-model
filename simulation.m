@@ -48,6 +48,9 @@ dumpDir = args.dumpDir;
 %     mkdir(OUT_DIR);
 % end
 
+% Game variables.
+
+PAYOFF_BUS = args.PAYOFF_BUS;
 CAR_NUMBER = args.CAR_NUMBER;
 
 if (CAR_NUMBER == 15)
@@ -59,7 +62,17 @@ else
 end
 
 
-PAYOFF_BUS = args.PAYOFF_BUS;
+% Chosen Model and model params.
+%%% Reinforcement Learning Models.
+
+rl_erevRoth_basic = 0;
+rl_erevRoth_RE = 1;
+rl_baliettiJaeggi = 2;
+
+RL_model = args.RL_model;
+
+% Balietti Jaeggi.
+
 INCREASE_BUS = args.INCREASE_BUS;
 INCREASE_CAR_GOT = args.INCREASE_CAR_GOT;                
 INCREASE_CAR_MISSED = args.INCREASE_CAR_MISSED;
@@ -71,6 +84,20 @@ INCREASE_DECAY = args.INCREASE_DECAY;
 DECREASE_DECAY = args.DECREASE_DECAY;
 INCREASE_SHOCK = args.INCREASE_SHOCK;
 DECREASE_SHOCK = args.DECREASE_SHOCK;
+
+TOT_INTERVAL = TIME_INTERVAL_DECREASE + TIME_INTERVAL_INCREASE;
+% + sum(1:TIME_INTERVAL_INCREASE) + 1;
+
+
+% Erev Roth.
+
+S1 = args.S1;
+epsilon = args.epsilon;
+phi = args.phi;
+rho1 = args.rho1;
+wPlus = args.wPlus;
+wMinus = args.wMinus;
+upsilon = args.upsilon;
 
 
 REPETITIONS = args.nRuns;
@@ -95,6 +122,14 @@ propensities_carbus = ones(N, nr_strategies);
 
 % Initial propensities for time for each strategy of each player.
 propensities_time = ones(N, nr_strategies_time);
+
+if (RL_model ~= rl_baliettiJaeggi)
+    % Multiplying for S1 (initial strength of propensities).
+    propensities_carbus = S1 .* propensities_carbus;
+    propensities_time = S1 .* propensities_time;
+    
+    referencePoints = rho1 * ones(N, T);
+end
 
 % Probabilities to choose car vs bus. (all equally probable at t=0).
 probabilities = ones(N, nr_strategies)*(1/nr_strategies);
@@ -168,7 +203,7 @@ for t = 1 : T
                 payoff = PAYOFF_CAR + (SLOPE_CAR * time);
             else
                 choseCarMissed = 1;
-                payoff = PAYOFF_CAR - (SLOPE_CAR * time);
+                payoff = PAYOFF_CAR - (SLOPE_CAR_MISS * time);
             end
             
             % Difference from BUS payoff and what received by choosing car.
@@ -176,6 +211,12 @@ for t = 1 : T
         end
         
         payoffs(idx, t) = payoff;
+        
+        
+        % Updating propensities.
+        
+        % Balietti Jaegger        
+        if (RL_model == rl_baliettiJaeggi)
         
         if (choseCarGotCar == 1)
             
@@ -239,6 +280,89 @@ for t = 1 : T
             propensities_carbus(idx, BUS) = ...
                 propensities_carbus(idx, BUS) + INCREASE_BUS;            
             
+        end
+        
+        % Erev Roth (basic or RE)
+        else 
+            
+            rho = referencePoints(idx);
+            reward = payoff - rho;
+            
+            if (reward < 0 )
+                rho = (1 - wMinus) * rho + wMinus * payoff;
+            else
+                rho = (1 - wPlus) * rho + wPlus * payoff;
+            end
+            referencePoints(idx) = rho;
+            
+            ownStrategyReward = (1 - epsilon) * reward;
+            otherStrategyReward = epsilon * reward;
+            
+            
+            if (choseBus == 1)
+            
+                newProp = (1 - phi) * propensities_carbus(idx, BUS) + ...
+                    ownStrategyReward;
+                
+                propensities_carbus(idx, BUS) = max(upsilon, newProp);
+                 
+                newProp = (1 - phi) * propensities_carbus(idx, CAR) + ...
+                    otherStrategyReward;
+                 
+                propensities_carbus(idx, CAR) = max(upsilon, newProp);
+            
+            % Car.
+            else
+                newProp = (1 - phi) * propensities_carbus(idx, CAR) + ...
+                    ownStrategyReward;
+                
+                propensities_carbus(idx, CAR) = max(upsilon, newProp);
+                
+                newProp = (1 - phi) * propensities_carbus(idx, BUS) + ...
+                    otherStrategyReward;
+                
+                propensities_carbus(idx, BUS) = max(upsilon, newProp);
+                
+                if (choseCarGotCar)
+                    timeTarget = min(time + INCREASE_SHOCK, ...
+                        nr_strategies_time);
+                else
+                    timeTarget = max(time - DECREASE_SHOCK, 1);
+                end
+                
+                downLimit = max(timeTarget - TIME_INTERVAL_DECREASE,1);
+                upLimit = min(timeTarget + TIME_INTERVAL_DECREASE, ...
+                    nr_strategies_time);
+                
+                
+                increase_unit = abs(reward) / (2 * TIME_INTERVAL_DECREASE);
+                
+                upToTarget = TIME_INTERVAL_DECREASE+1;
+                increases = increase_unit:increase_unit:increase_unit*upToTarget;
+                startIncreases = (upToTarget+1)-length(downLimit:timeTarget);
+                increases_down = increases(startIncreases:end);
+                
+                ii = 0;
+                for i = 1:nr_strategies_time
+                    
+                    newProp = (1 - phi) * propensities_time(idx, i);
+                    
+                    if (i >= downLimit && i <= timeTarget)
+                   
+                        ii = ii + 1;
+                        increase = increases_down(ii);
+                        newProp = newProp + increase;
+                        
+                    elseif (i > timeTarget && i < upLimit)
+                        increase = increase - increase_unit;
+                        newProp = newProp + increase;
+                    end
+                    
+                    propensities_time(idx, i) = max(upsilon, newProp);
+                    
+                end
+             
+            end
         end
               
         

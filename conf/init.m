@@ -15,10 +15,10 @@ nRuns = 10;
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Cars.
-CAR_NUMBER = 15; % CAR_SHARE = 0.75;
+CAR_NUMBER = [5 10 15 ]; % CAR_SHARE = 0.75;
 
 % Payoffs.
-PAYOFF_BUS = 50;
+PAYOFF_BUS = [ 50 70 ];
 
 %% Learning Variables.
 %%%%%%%%%%%%%%%%%%%%%%
@@ -59,6 +59,36 @@ INCREASE_SHOCK = 5;
 
 % If did not get car, propensities + DECREASE_SHOCK will be updated.
 DECREASE_SHOCK = 10;
+
+
+%% Roth Erev model
+
+% Strength of initial propensities.
+S1 = 1;
+
+% Experimentation / Error.
+epsilon = 0.2;
+
+% Forgetting (or recency).
+phi = 0.001;
+
+% Reference point at time 0.
+rho1 = 0;
+
+% Weights assigned to positive and negative reinforcement.
+wPlus = 0.01;
+wMinus = 0.02;
+
+% Positive Constraint.
+upsilon = 0.0001;
+
+%%% Reinforcement Learning Models.
+
+rl_erevRoth_basic = 0;
+rl_erevRoth_RE = 1;
+rl_baliettiJaeggi = 2;
+
+RL_model = 1;
 
 %% Seed.
 

@@ -47,7 +47,7 @@ for i1=1:length(CAR_NUMBER)
     my_CAR_NUMBER = CAR_NUMBER(i1);
     
     for i2=1:length(PAYOFF_BUS)
-        my_PAYOFF_BUS = PAYOFF_BUS(i2);   
+        my_PAYOFF_BUS = PAYOFF_BUS(i2);        
     
     for i3=1:length(INCREASE_BUS)
         my_INCREASE_BUS = INCREASE_BUS(i3);
@@ -80,8 +80,28 @@ for i1=1:length(CAR_NUMBER)
         my_INCREASE_SHOCK = INCREASE_SHOCK(i12);
          
     for i13=1:length(DECREASE_SHOCK)
-        my_DECREASE_SHOCK = DECREASE_SHOCK(i13);
- 
+        my_DECREASE_SHOCK = DECREASE_SHOCK(i13); 
+        
+    for i14=1:length(S1)
+        my_S1 = S1(i14);
+        
+    for i15=1:length(epsilon)
+        my_epsilon = epsilon(i15);
+        
+    for i16=1:length(phi)
+        my_phi = phi(i16);
+        
+    for i17=1:length(rho1)
+        my_rho1 = rho1(i17);
+        
+    for i18=1:length(wPlus)
+        my_wPlus = wPlus(i18);
+        
+    for i19=1:length(wMinus)
+        my_wMinus = wMinus(i19);
+        
+    for i20=1:length(upsilon)
+        my_upsilon = upsilon(i20);
          
           
             % Defining seed
@@ -107,6 +127,7 @@ for i1=1:length(CAR_NUMBER)
                 'DUMP', DUMP, ...
                 'nRuns', nRuns, ...
                 'seed', seed, ...
+                'RL_model', RL_model, ...
                 'CAR_NUMBER', my_CAR_NUMBER, ...
                 'PAYOFF_BUS', my_PAYOFF_BUS, ...
                 'INCREASE_BUS', my_INCREASE_BUS, ...
@@ -119,7 +140,14 @@ for i1=1:length(CAR_NUMBER)
                 'INCREASE_DECAY', my_INCREASE_DECAY, ...
                 'DECREASE_DECAY', my_DECREASE_DECAY, ...
                 'INCREASE_SHOCK', my_INCREASE_SHOCK, ...
-                'DECREASE_SHOCK', my_DECREASE_SHOCK ...              
+                'DECREASE_SHOCK', my_DECREASE_SHOCK, ...
+                'S1', my_S1, ...
+                'epsilon', my_epsilon, ...
+                'phi', my_phi, ...                
+                'rho1', my_rho1, ...
+                'wPlus', my_wPlus, ...
+                'wMinus', my_wMinus, ...
+                'upsilon', my_upsilon ...
             );
             
             fprintf('\nSim count: %i\n',simCount);            
@@ -133,6 +161,13 @@ for i1=1:length(CAR_NUMBER)
             
             % Updating the simulations count.
             simCount=simCount+1;
+    end
+    end
+    end
+    end
+    end
+    end
+    end
     end
     end
     end
