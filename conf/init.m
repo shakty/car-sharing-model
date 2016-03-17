@@ -10,7 +10,6 @@ clear
 nRuns = 10;
 
 
-
 %% Variables for the game.
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -55,40 +54,43 @@ INCREASE_DECAY = 0.2;
 DECREASE_DECAY = 0.1;
 
 % If got car, propensities + INCREASE_SHOCK will be updated.
-INCREASE_SHOCK = 5;
+INCREASE_SHOCK = 20;
 
 % If did not get car, propensities + DECREASE_SHOCK will be updated.
-DECREASE_SHOCK = 10;
+DECREASE_SHOCK = 30;
 
 
 %% Roth Erev model
 
+
+INCREASE_SHOCK = 40;
+
+DECREASE_SHOCK = 40;
+
+TIME_INTERVAL_DECREASE = 10;
+
+% Experimentation / Error.
+epsilon = [0.2];
+
+% Forgetting (or recency).
+phi = [0.01];
+
 % Strength of initial propensities.
 S1 = 1;
 
-% Experimentation / Error.
-epsilon = 0.2;
-
-% Forgetting (or recency).
-phi = 0.001;
-
-% Reference point at time 0.
+% Reference point at time 0 (baseline BUS_PAYOFF).
 rho1 = 0;
 
 % Weights assigned to positive and negative reinforcement.
-wPlus = 0.01;
-wMinus = 0.02;
+% How much new experience is weighted against old. (1 = only new).
+wPlus = 0.5;
+wMinus = 0.7;
 
 % Positive Constraint.
 upsilon = 0.0001;
 
-%%% Reinforcement Learning Models.
-
-rl_erevRoth_basic = 0;
-rl_erevRoth_RE = 1;
-rl_baliettiJaeggi = 2;
-
-RL_model = 1;
+% Use data from experiment to set initial propensities and probabilities.
+INIT_T1 = 1;
 
 %% Seed.
 
@@ -113,6 +115,6 @@ end
 %% Save it!
 %%%%%%%%%%%
 
-simName = 'b50_c75_rl';
+simName = 'newsweep2';
 
 save(['mat/' simName]);

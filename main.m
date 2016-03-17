@@ -14,7 +14,7 @@ path(path,'util/'); % Help functions
 confDir = 'conf/mat/';
 
 %% Loading Conf
-load([confDir 'b50_c75_rl'])
+load([confDir 'newsweep2'])
 
 %% Simulation stuff.
 %%%%%%%%%%%%%%%%%%%%
@@ -22,15 +22,51 @@ load([confDir 'b50_c75_rl'])
 dumpDir = 'dump/';
 confDir = 'conf/mat/';
 
-compLOCAL = 0;
-compPARALLEL = 1;
-compLSF = 2;
-
 %% Modifying params locally.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-nRuns = 15;
-DUMP = 1;
+nRuns = 50;
+DUMP = 0;
+DEBUG = 0;
+
+PAYOFF_BUS = [75];
+
+% INIT_T1 = 1;
+% 
+% % Cars.
+% CAR_NUMBER = [15]; % CAR_SHARE = 0.75;
+% % Payoffs.
+% PAYOFF_BUS = [50];
+% 
+% S1 = [1];
+% 
+% INCREASE_SHOCK = 40;
+% 
+% DECREASE_SHOCK = 40;
+% 
+% % Experimentation / Error.
+% epsilon = [0.2];
+% 
+% % Forgetting (or recency).
+% phi = [0.01];
+% 
+% % Weights assigned to positive and negative reinforcement.
+% % How much new experience is weighted against old. (1 = only new).
+% wPlus = 0.5;
+% wMinus = 0.7;
+% 
+% TIME_INTERVAL_DECREASE = 10;
+% 
+% rho1 = - 20;
+
+% P1_carbus = 0.22 0.36
+% P1_time = 30 24
+
+ 
+% RL_model = rl_baliettiJaeggi;
+
+% csvFile = '/home/stefano/Documents/mypapers/kay_car/data/ALL/summary_exp.csv';
+% exp = csvread(csvFile);
 
 %% Start Vectorization of Parameters Sets
 fprintf('\nStarting...\n');
@@ -125,9 +161,10 @@ for i1=1:length(CAR_NUMBER)
                 'simCount', simCount, ...
                 'dumpDir', folderName, ...
                 'DUMP', DUMP, ...
+                'DEBUG', DEBUG, ...
+                'INIT_T1', INIT_T1, ...
                 'nRuns', nRuns, ...
                 'seed', seed, ...
-                'RL_model', RL_model, ...
                 'CAR_NUMBER', my_CAR_NUMBER, ...
                 'PAYOFF_BUS', my_PAYOFF_BUS, ...
                 'INCREASE_BUS', my_INCREASE_BUS, ...
