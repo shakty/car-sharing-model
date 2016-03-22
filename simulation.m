@@ -121,15 +121,19 @@ probabilities_time = ones(N, nr_strategies_time)*(1/nr_strategies_time);
 
 % Set initial propensities and probabilities based on experimental data.
 if (INIT_T1) 
-        
+
     if (PAYOFF_BUS == 50)
-        PBUS = 0.2174941;
-        TCAR = 30.16548;
-        TCAR_SD = 24.26659;
-    else        
-        PBUS = 0.3605201;
-        TCAR = 23.82485;
-        TCAR_SD = 24.94278;
+        % Probability of taking the bus at round 1.
+        PBUS = 0.2078721;
+        % Avg. departure time and standard deviation at round 1.
+        TCAR = 38.77484;
+        TCAR_SD = 20.68923;
+    else
+        % Probability of taking the bus at round 1.
+        PBUS = 0.3522868;
+        % Avg. departure time and standard deviation at round 1.
+        TCAR = 37.57252;
+        TCAR_SD = 21.82269;
     end
     
     increase = referencePoints(1) .* (1 - epsilon);

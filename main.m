@@ -11,7 +11,7 @@ dbstop if error
 %% Add other directories to path
 path(path,'util/'); % Help functions
 
-confDir = 'conf/mat/';
+confDir = 'conf/';
 
 %% Loading Conf
 load([confDir 'newsweep2'])

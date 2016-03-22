@@ -117,4 +117,4 @@ end
 
 simName = 'newsweep2';
 
-save(['mat/' simName]);
+save(['conf/' simName]);
