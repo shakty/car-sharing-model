@@ -11,44 +11,48 @@ dbstop if error
 %% Add other directories to path
 path(path,'util/'); % Help functions
 
-confDir = 'conf/';
-
-%% Loading Conf
-load([confDir 'newsweep2'])
-
 %% Simulation stuff.
 %%%%%%%%%%%%%%%%%%%%
 
 dumpDir = 'dump/';
-confDir = 'conf/mat/';
+confDir = 'conf/';
+
+%% Loading Conf
+load([confDir 'simple'])
 
 %% Modifying params locally.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 nRuns = 50;
-DUMP = 0;
+DUMP = 1;
 DEBUG = 0;
 
-PAYOFF_BUS = [75];
-
-% INIT_T1 = 1;
+% wPlus = 1;
+% wMinus = 1;
 % 
+% rho1 = 0;
+% % 
+% % 
+% % INIT_T1 = 0 ;
+% % 
 % % Cars.
 % CAR_NUMBER = [15]; % CAR_SHARE = 0.75;
 % % Payoffs.
 % PAYOFF_BUS = [50];
+% % 
+% % S1 = [1];
+% % 
+% % INCREASE_SHOCK = 40;
+% % 
+% % DECREASE_SHOCK = 40;
+% % 
+% % % Experimentation / Error.
 % 
-% S1 = [1];
+% epsilon = 0;
+% % 
+% % % Forgetting (or recency).
+% phi = 0;
 % 
-% INCREASE_SHOCK = 40;
-% 
-% DECREASE_SHOCK = 40;
-% 
-% % Experimentation / Error.
-% epsilon = [0.2];
-% 
-% % Forgetting (or recency).
-% phi = [0.01];
 % 
 % % Weights assigned to positive and negative reinforcement.
 % % How much new experience is weighted against old. (1 = only new).
@@ -59,11 +63,6 @@ PAYOFF_BUS = [75];
 % 
 % rho1 = - 20;
 
-% P1_carbus = 0.22 0.36
-% P1_time = 30 24
-
- 
-% RL_model = rl_baliettiJaeggi;
 
 % csvFile = '/home/stefano/Documents/mypapers/kay_car/data/ALL/summary_exp.csv';
 % exp = csvread(csvFile);
@@ -84,33 +83,9 @@ for i1=1:length(CAR_NUMBER)
     
     for i2=1:length(PAYOFF_BUS)
         my_PAYOFF_BUS = PAYOFF_BUS(i2);        
-    
-    for i3=1:length(INCREASE_BUS)
-        my_INCREASE_BUS = INCREASE_BUS(i3);
-        
-    for i4=1:length(INCREASE_CAR_MISSED)
-        my_INCREASE_CAR_MISSED = INCREASE_CAR_MISSED(i4);
-                
-    for i5=1:length(INCREASE_CAR_GOT)
-        my_INCREASE_CAR_GOT = INCREASE_CAR_GOT(i5);
-                        
-    for i6=1:length(INCREASE_TIME)
-        my_INCREASE_TIME = INCREASE_TIME(i6);
-         
-    for i7=1:length(DECREASE_TIME)
-        my_DECREASE_TIME = DECREASE_TIME(i7);
-                
-    for i8=1:length(TIME_INTERVAL_INCREASE)
-        my_TIME_INTERVAL_INCREASE = TIME_INTERVAL_INCREASE(i8);
-                
+                    
     for i9=1:length(TIME_INTERVAL_DECREASE)
-        my_TIME_INTERVAL_DECREASE = TIME_INTERVAL_DECREASE(i9);
-        
-    for i10=1:length(INCREASE_DECAY)
-        my_INCREASE_DECAY = INCREASE_DECAY(i10);
-         
-    for i11=1:length(DECREASE_DECAY)
-        my_DECREASE_DECAY = DECREASE_DECAY(i11);
+        my_TIME_INTERVAL_DECREASE = TIME_INTERVAL_DECREASE(i9);           
         
     for i12=1:length(INCREASE_SHOCK)
         my_INCREASE_SHOCK = INCREASE_SHOCK(i12);
@@ -166,16 +141,8 @@ for i1=1:length(CAR_NUMBER)
                 'nRuns', nRuns, ...
                 'seed', seed, ...
                 'CAR_NUMBER', my_CAR_NUMBER, ...
-                'PAYOFF_BUS', my_PAYOFF_BUS, ...
-                'INCREASE_BUS', my_INCREASE_BUS, ...
-                'INCREASE_CAR_GOT', my_INCREASE_CAR_GOT, ...                
-                'INCREASE_CAR_MISSED', my_INCREASE_CAR_MISSED, ...
-                'INCREASE_TIME', my_INCREASE_TIME, ...
-                'DECREASE_TIME', my_DECREASE_TIME, ...
-                'TIME_INTERVAL_INCREASE', my_TIME_INTERVAL_INCREASE, ...
+                'PAYOFF_BUS', my_PAYOFF_BUS, ...          
                 'TIME_INTERVAL_DECREASE', my_TIME_INTERVAL_DECREASE, ...
-                'INCREASE_DECAY', my_INCREASE_DECAY, ...
-                'DECREASE_DECAY', my_DECREASE_DECAY, ...
                 'INCREASE_SHOCK', my_INCREASE_SHOCK, ...
                 'DECREASE_SHOCK', my_DECREASE_SHOCK, ...
                 'S1', my_S1, ...
@@ -198,14 +165,6 @@ for i1=1:length(CAR_NUMBER)
             
             % Updating the simulations count.
             simCount=simCount+1;
-    end
-    end
-    end
-    end
-    end
-    end
-    end
-    end
     end
     end
     end

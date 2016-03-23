@@ -70,10 +70,14 @@ end
 S1 = args.S1;
 epsilon = args.epsilon;
 phi = args.phi;
-rho1 = PAYOFF_BUS + args.rho1;
 wPlus = args.wPlus;
 wMinus = args.wMinus;
 upsilon = args.upsilon;
+
+% Rho1, bus relative.
+% rho1 = PAYOFF_BUS + args.rho1;
+% Rho1, absolute.
+rho1 = args.rho1;
 
 TIME_INTERVAL_DECREASE = args.TIME_INTERVAL_DECREASE;
 
@@ -179,6 +183,13 @@ strategies_time = ones(N, T);
 
 for t = 1 : T
     
+    if (phi > 0)        
+        % Discount all propensities regardless of choice.
+        % Notice that probabilities are unchanged here.
+        propensities_time = (1 - phi) .* propensities_time;
+        propensities_carbus = (1 - phi) .* propensities_carbus;
+    end
+    
     for player = 1 : N
         
         
@@ -213,7 +224,6 @@ for t = 1 : T
     for player = 1 : N
         
         choseCarGotCar = 0;
-        choseCarMissed = 0;
         choseBus = 0;
         
         idx = sorted_players(player);
@@ -232,7 +242,6 @@ for t = 1 : T
                 leftCars = leftCars - 1;
                 payoff = PAYOFF_CAR + (SLOPE_CAR * time);
             else
-                choseCarMissed = 1;
                 payoff = PAYOFF_CAR - (SLOPE_CAR_MISS * time);
             end
         end
@@ -257,33 +266,22 @@ for t = 1 : T
         ownStrategyReward = (1 - epsilon) * reward;
         otherStrategyReward = epsilon * reward;
         
-        % Discount time propensity even if bus was chosen.
-        propensities_time(idx, :) = (1 - phi) .* propensities_time(idx, :);
         
         if (choseBus == 1)
             
-            newProp = (1 - phi) * propensities_carbus(idx, BUS) + ...
-                ownStrategyReward;
-            
+            newProp = propensities_carbus(idx, BUS) + ownStrategyReward;            
             propensities_carbus(idx, BUS) = max(upsilon, newProp);
             
-            newProp = (1 - phi) * propensities_carbus(idx, CAR) + ...
-                otherStrategyReward;
-            
+            newProp = propensities_carbus(idx, CAR) + otherStrategyReward;            
             propensities_carbus(idx, CAR) = max(upsilon, newProp);
             
-            % Car.
+        % Car.
         else
-            newProp = (1 - phi) * propensities_carbus(idx, CAR) + ...
-                ownStrategyReward;
-            
+            newProp = propensities_carbus(idx, CAR) + ownStrategyReward;            
             propensities_carbus(idx, CAR) = max(upsilon, newProp);
             
-            newProp = (1 - phi) * propensities_carbus(idx, BUS) + ...
-                otherStrategyReward;
-            
-            propensities_carbus(idx, BUS) = max(upsilon, newProp);
-            
+            newProp = propensities_carbus(idx, BUS) + otherStrategyReward;            
+            propensities_carbus(idx, BUS) = max(upsilon, newProp);            
             
             % Time update.
             
