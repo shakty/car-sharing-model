@@ -24,17 +24,17 @@ PAYOFF_BUS = [ 50 70 ];
 
 %% Roth Erev model
 
-INCREASE_SHOCK = 40;
+INCREASE_SHOCK = 25;
 
 DECREASE_SHOCK = 40;
 
 TIME_INTERVAL_DECREASE = 10;
 
 % Experimentation / Error.
-epsilon = [0];
+epsilon = [0.2];
 
 % Forgetting (or recency).
-phi = [0];
+phi = [0.001];
 
 % Strength of initial propensities.
 S1 = 1;
@@ -44,14 +44,14 @@ rho1 = 0;
 
 % Weights assigned to positive and negative reinforcement.
 % How much new experience is weighted against old. (1 = only new).
-wPlus = 1;
-wMinus = 1;
+wPlus = 0.6;
+wMinus = 0.6;
 
 % Positive Constraint.
 upsilon = 0.0001;
 
 % Use data from experiment to set initial propensities and probabilities.
-INIT_T1 = 0;
+INIT_T1 = 1;
 
 %% Seed.
 
@@ -76,6 +76,6 @@ end
 %% Save it!
 %%%%%%%%%%%
 
-simName = 'simple';
+simName = 'timeright';
 
 save(['conf/' simName]);
