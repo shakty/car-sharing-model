@@ -221,10 +221,10 @@ for i1=1:length(CAR_NUMBER)
                     if (mod(taskCount, TASKS4JOB) == 0)
                         submit(j);
                         
-                        if (simCount ~= nSimulations)
+                        % if (simCount ~= nSimulations)
                             j = createJob(sched);
                             jobCount = jobCount + 1;
-                        end
+                        % end
                         
                     end
                     
