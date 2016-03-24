@@ -24,9 +24,9 @@ PAYOFF_BUS = [ 50 70 ];
 
 %% Roth Erev model
 
-INCREASE_SHOCK = 25;
+INCREASE_SHOCK = [5, 20, 40, 50, 60];
 
-DECREASE_SHOCK = 40;
+DECREASE_SHOCK = [1:5:61];
 
 TIME_INTERVAL_DECREASE = 10;
 
@@ -76,6 +76,8 @@ end
 %% Save it!
 %%%%%%%%%%%
 
-simName = 'timeright';
+simName = 'sweep_increase';
 
 save(['conf/' simName]);
+
+fprintf('File saved: %s\n', ['conf/' simName '.mat']);

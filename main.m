@@ -18,48 +18,48 @@ dumpDir = 'dump/';
 confDir = 'conf/';
 
 %% Loading Conf
-load([confDir 'timeright'])
+load([confDir 'sweep_increase'])
 
 %% Modifying params locally.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-nRuns = 1;
-DUMP = 0;
-DEBUG = 1;
+nRuns = 50;
+DUMP = 1;
+DEBUG = 0;
 
-% Cars.
-CAR_NUMBER = [ 15 ];
-% Payoffs.
-PAYOFF_BUS = [ 50 ];
-
-INCREASE_SHOCK = 25;
-
-DECREASE_SHOCK = 40;
-
-TIME_INTERVAL_DECREASE = 10;
-
-% Experimentation / Error.
-epsilon = [0.2];
-
-% Forgetting (or recency).
-phi = [0.001];
-
-% Strength of initial propensities.
-S1 = 1;
-
-% Reference point at time 0 (baseline BUS_PAYOFF).
-rho1 = 0;
-
-% Weights assigned to positive and negative reinforcement.
-% How much new experience is weighted against old. (1 = only new).
-wPlus = 0.6;
-wMinus = 0.6;
-
-% Positive Constraint.
-upsilon = 0.0001;
-
-% Use data from experiment to set initial propensities and probabilities.
-INIT_T1 = 1;
+% % Cars.
+% CAR_NUMBER = [ 15 ];
+% % Payoffs.
+% PAYOFF_BUS = [ 50 ];
+% 
+% INCREASE_SHOCK = 25;
+% 
+% DECREASE_SHOCK = 40;
+% 
+% TIME_INTERVAL_DECREASE = 10;
+% 
+% % Experimentation / Error.
+% epsilon = [0.2];
+% 
+% % Forgetting (or recency).
+% phi = [0.001];
+% 
+% % Strength of initial propensities.
+% S1 = 1;
+% 
+% % Reference point at time 0 (baseline BUS_PAYOFF).
+% rho1 = 0;
+% 
+% % Weights assigned to positive and negative reinforcement.
+% % How much new experience is weighted against old. (1 = only new).
+% wPlus = 0.6;
+% wMinus = 0.6;
+% 
+% % Positive Constraint.
+% upsilon = 0.0001;
+% 
+% % Use data from experiment to set initial propensities and probabilities.
+% INIT_T1 = 1;
 
 
 % csvFile = '/home/stefano/Documents/mypapers/kay_car/data/ALL/summary_exp.csv';
