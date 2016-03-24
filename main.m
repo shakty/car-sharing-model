@@ -29,6 +29,7 @@ DEBUG = 0;
 
 compLocal = 1;
 compLSF = 2;
+compParallel = 3;
 
 clusterDir = '/cluster/home/gess/balistef/matlab/car-sharing-model/';
 if (exist(clusterDir, 'dir') == 7)
