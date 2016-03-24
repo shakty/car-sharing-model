@@ -27,6 +27,16 @@ nRuns = 50;
 DUMP = 1;
 DEBUG = 0;
 
+compLocal = 1;
+compLSF = 2;
+
+clusterDir = '/cluster/home/gess/balistef/matlab/car-sharing-model/';
+if (exist(clusterDir, 'dir') == 7)
+    comp = compLSF;
+else
+    comp = compLocal;
+end
+
 % % Cars.
 % CAR_NUMBER = [ 15 ];
 % % Payoffs.
@@ -73,7 +83,43 @@ uniqueSimName = createSimName(simName, DUMP, dumpDir, 0);
 folderName = [ dumpDir uniqueSimName '/' ];
 
 
+if (comp == compLSF)
+    % How many sequential simulations in one task.
+    SIMS4TASK = 10;
+    % How many tasks group in one job.
+    TASKS4JOB = 2;
+    
+    % Task = container of many simulations.
+    taskCount = 1;
+    % Container = container of many tasks.
+    jobCount = 1;
+    
+    % logFolder = ['log/' params.simName];
+    % mkdir(logFolder); % The name is unique under the dump directory.
+    % dumpFolder = [ params.dumpDir params.simName];
+    
+    % Local
+    % sched = parcluster();
+    % sched = findResource('scheduler', 'type', 'local');
+    
+    % Remote.
+    parallel.importProfile('/cluster/apps/matlab/support/BrutusLSF8h.settings')
+    sched = findResource('scheduler','type','lsf');
+    % sched=parcluster('BrutusLSF8h');
+    % submitArgs = [' -W 36:00 -R "rusage[mem=2000]" -o ' logFolder '/' params.simName '.log'];
+    submitArgs = [' -W 8:00 -R "rusage[mem=2000]" '];
+    set(sched, 'SubmitArguments', submitArgs);
+    % set(sched, 'DataLocation', [logFolder '/']);
+    
+    j = createJob(sched);
+    
+elseif (comp == compParallel)
+
+    matlabpool open
+end
+
 simCount = 1;
+
 
 % Nest several loops to simulate parameter sets.
 for i1=1:length(CAR_NUMBER)
@@ -156,9 +202,41 @@ for i1=1:length(CAR_NUMBER)
             fprintf('------------------------------------\n');            
             display(paramsObj);        
             fprintf('------------------------------------\n');
-        
-            simulation(paramsObj);
-
+            
+            
+            if (comp == compLocal)        
+                simulation(paramsObj);
+            else
+                % It is convenient to group together more simulations in one
+                % task if simulations are short. Matlab overhead to start on
+                % each cluster node is about 1 minute.
+                taskIdx = mod(simCount, SIMS4TASK);
+                
+                if (taskIdx == 0)
+                    paramObjs{SIMS4TASK} = paramsObj;
+                    createTask(j, @wrappersim, 0, {{paramObjs}});
+                    
+                    % Submit the job to the scheduler in batches
+                    if (mod(taskCount, TASKS4JOB) == 0)
+                        submit(j);
+                        
+                        if (simCount ~= nSimulations)
+                            j = createJob(sched);
+                            jobCount = jobCount + 1;
+                        end
+                        
+                    end
+                    
+                    % Update task count after checking to submit job
+                    paramObjs = cell(SIMS4TASK, 1);
+                    taskCount = taskCount + 1;
+                    
+                else
+                    paramObjs{taskIdx} = paramsObj;
+                end
+                
+                simCount = simCount + 1;
+            end
             fprintf('\n\n');
             
             % Updating the simulations count.
@@ -176,6 +254,9 @@ for i1=1:length(CAR_NUMBER)
     end
 end
 
+if (comp == compParallel)
+    matlabpool close
+end
 
 fprintf('Execution completed correctly\n');
 % Exit Matlab when invoked from command line with -r option

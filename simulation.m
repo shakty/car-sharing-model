@@ -96,7 +96,7 @@ REPETITIONS = args.nRuns;
 % rep_propensities_carbus = zeros(N, 2, REPETITIONS);
 % rep_propensities_time = zeros(N, nr_strategies_time, REPETITIONS);
 
-for r = 1 : REPETITIONS
+parfor r = 1 : REPETITIONS
 
 
 % Clear simulation data.
@@ -503,7 +503,7 @@ end
 
 
 end        
+     
 
-        
 end
 
