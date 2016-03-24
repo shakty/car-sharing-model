@@ -95,7 +95,7 @@ if (comp == compLSF)
     % Container = container of many tasks.
     jobCount = 1;
     
-    logFolder = ['log/' params.simName];
+    logFolder = ['log/' uniqueSimName];
     mkdir(logFolder); % The name is unique under the dump directory.
     dumpFolder = [ dumpDir uniqueSimName];
     
