@@ -1,0 +1,1 @@
+bsub -J hs_chain -W 1:00 -N matlab -nodisplay -singleCompThread -r "main"
