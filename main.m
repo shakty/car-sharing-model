@@ -236,12 +236,10 @@ for i1=1:length(CAR_NUMBER)
                     paramObjs{taskIdx} = paramsObj;
                 end
                 
+                % Update simulation count.
                 simCount = simCount + 1;
             end
-            fprintf('\n\n');
-            
-            % Updating the simulations count.
-            simCount=simCount+1;
+            fprintf('\n\n');            
     end
     end
     end
