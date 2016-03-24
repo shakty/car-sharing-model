@@ -94,9 +94,9 @@ if (comp == compLSF)
     % Container = container of many tasks.
     jobCount = 1;
     
-    % logFolder = ['log/' params.simName];
-    % mkdir(logFolder); % The name is unique under the dump directory.
-    % dumpFolder = [ params.dumpDir params.simName];
+    logFolder = ['log/' params.simName];
+    mkdir(logFolder); % The name is unique under the dump directory.
+    dumpFolder = [ dumpDir uniqueSimName];
     
     % Local
     % sched = parcluster();
@@ -106,10 +106,10 @@ if (comp == compLSF)
     parallel.importProfile('/cluster/apps/matlab/support/BrutusLSF8h.settings')
     sched = findResource('scheduler','type','lsf');
     % sched=parcluster('BrutusLSF8h');
-    % submitArgs = [' -W 36:00 -R "rusage[mem=2000]" -o ' logFolder '/' params.simName '.log'];
-    submitArgs = [' -W 8:00 -R "rusage[mem=2000]" '];
+    submitArgs = [' -W 1:00 -R "rusage[mem=2000]" -o ' logFolder '/' uniqueSimName '.log'];
+    % submitArgs = [' -W 8:00 -R "rusage[mem=2000]" '];
     set(sched, 'SubmitArguments', submitArgs);
-    % set(sched, 'DataLocation', [logFolder '/']);
+    set(sched, 'DataLocation', [logFolder '/']);
     
     j = createJob(sched);
     
