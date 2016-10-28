@@ -75,9 +75,9 @@ wMinus = args.wMinus;
 upsilon = args.upsilon;
 
 % Rho1, bus relative.
-% rho1 = PAYOFF_BUS + args.rho1;
+rho1 = PAYOFF_BUS + args.rho1;
 % Rho1, absolute.
-rho1 = args.rho1;
+%rho1 = args.rho1;
 
 TIME_INTERVAL_DECREASE = args.TIME_INTERVAL_DECREASE;
 
@@ -96,7 +96,7 @@ REPETITIONS = args.nRuns;
 % rep_propensities_carbus = zeros(N, 2, REPETITIONS);
 % rep_propensities_time = zeros(N, nr_strategies_time, REPETITIONS);
 
-parfor r = 1 : REPETITIONS
+for r = 1 : REPETITIONS
 
 
 % Clear simulation data.
@@ -116,6 +116,8 @@ propensities_carbus = S1 .* propensities_carbus;
 propensities_time = S1 .* propensities_time;
 
 referencePoints = rho1 .* ones(N, 1);
+%referencePoints = [ repmat(0,2,1)' repmat(PAYOFF_BUS+20,18,1)'];
+% referencePoints = zeros(N,1);
 
 % Probabilities to choose car vs bus.
 probabilities = ones(N, nr_strategies)*(1/nr_strategies);
@@ -130,14 +132,39 @@ if (INIT_T1)
         % Probability of taking the bus at round 1.
         PBUS = 0.2078721;
         % Avg. departure time and standard deviation at round 1.
-        TCAR = 38.77484 + 15;
-        TCAR_SD = 20.68923 + 5;
+        TCAR = 38.77484;
+        TCAR_SD = 20.68923;
+        
+        % Distribution of departure times from experiment (counts).
+        props = [ ...
+            85   1   3   0   0   2   1   0   3   2   6   1   0   1   0   8   2   1   2   0 ...
+            10   2   0   2   2   6   2   2   7   7  84   1   1   5   2   8   3   0   1 ...
+            8  32   4   4   2   7  56   3   2   1   1  28   0   5   1   3  12   2   4 ...
+            7   4 195 ...
+        ];
+    
+        time_distr = [  1 1 1 1 31 31 31 32 41 46 46 51 56 59 61 61 61 61 61 61 ];
+        
     else
         % Probability of taking the bus at round 1.
         PBUS = 0.3522868;
         % Avg. departure time and standard deviation at round 1.
-        TCAR = 37.57252 + 15;
-        TCAR_SD = 21.82269 + 5;
+        TCAR = 37.57252;
+        TCAR_SD = 21.82269;
+        
+        % Distribution of departure times from experiment (counts).
+        props = [ ...
+             95  1   0   0   2   0   1   0   1   0   3   0   0   1   0   6   0   1   0   2 ...
+             5   0   1   2   1   2   1   1   1   2  67   9   6   1   1   2   4   1   3 ...
+             2  17   1   2   3   4  51   4   4   3   5  21   3   5   0   1   9   1   4 ...
+             7   3 151 ...
+        ];
+    
+        
+        time_distr = [ 1 1 1 21 31 31 31 41 46 46 51 56 61 61 61 61 61 61 61 ];
+        time_distr_last3 = [ 16 36 40 ];
+        time_distr = sort([ time_distr time_distr_last3(randi(3)) ]);
+    
     end
     
     increase = referencePoints(1) * (1 - epsilon);
@@ -150,22 +177,26 @@ if (INIT_T1)
     propensities_carbus(tmp,CAR) = S1;
     propensities_carbus(tmp,BUS) = propensities_carbus(tmp,BUS).*increase;
     
-    % As from the experimental distribution. (counts).
-    props = [ ...
-        180   3   4   0   4   2   2   0   4   4   9   2   1   2  0   15   3   2   3   3  15   3 ...
-          1   5   3   9   3   6   9   9 152  10   7   6   5  10   7   2   4  11  49 ...
-          6   6   5  12 108   7   6   4   7  49   3  10   1   5  23   3   8  15   7 ...
-        348 ...
-    ];
-
-    propensities_time = repmat(props, N, 1); 
+%     % As from the experimental distribution across conditions. (counts).
+%     props = [ ...
+%         180   3   4   0   4   2   2   0   4   4   9   2   1   2  0   15   3   2   3   3  15   3 ...
+%           1   5   3   9   3   6   9   9 152  10   7   6   5  10   7   2   4  11  49 ...
+%           6   6   5  12 108   7   6   4   7  49   3  10   1   5  23   3   8  15   7 ...
+%         348 ...
+%     ];
+        
+    
+    % This snippet initializes ALL probabilities of EACH individual based
+    % on the GLOBAL distribution of all the population.
+        
     % tmp = normpdf(1:nr_strategies_time, TCAR, TCAR_SD).*increase.*100;
+    
+    propensities_time = repmat(props, N, 1);    
     for i=1:N
         jitter = 1.1 + (0.9-1.1).*rand(nr_strategies_time, 1);
         
         propensities_time(i,:) = props .* jitter';
         % propensities_time(i,:) = propensities_time(i,:) .* tmp;
-        
         
         sumPropensities = sum(propensities_carbus(i, :));
         probabilities(i, BUS) = propensities_carbus(i, BUS) / ...
@@ -178,10 +209,51 @@ if (INIT_T1)
         for it = 1 : nr_strategies_time
             probabilities_time(i, it) = propensities_time(i, it) / ...
                 sumPropensities;
-        end
-        
-        
+        end        
     end    
+    
+    
+    % This snippet initializes ONE probability among ALL for EACH
+    % individual. The GLOBAL distribution of all simulated players
+    % should look more or less like the experimental one, but each
+    % player has only one very strong intensity.
+    
+%     timeIdx = 1;
+%     for i=1:N
+%         jitter = 1.1 + (0.9-1.1).*rand(nr_strategies_time, 1);
+%         
+%         
+%         % Add heterogeneity of reference points.
+%         % referencePoints(i) = max(0, referencePoints(i) + heterogeneity(i));
+%     
+%         sumPropensities = sum(propensities_carbus(i, :));
+%         probabilities(i, BUS) = propensities_carbus(i, BUS) / ...
+%             sumPropensities;
+%         probabilities(i, CAR) = propensities_carbus(i, CAR) / ...
+%             sumPropensities;
+%         
+%         sumPropensities = sum(propensities_time(i, :));
+%         propensities_time(i, time_distr(timeIdx)) = sumPropensities * 0.85;
+%         
+%         for it = 1 : nr_strategies_time
+%             probabilities_time(i, it) = propensities_time(i, it) / ...
+%                 sumPropensities;
+%         end
+%         timeIdx = timeIdx + 1;
+%     end    
+    
+    % This snippet initializes ONE probability among ALL for EACH
+    % individual. The GLOBAL distribution of all simulated players
+    % should look more or less like the experimental one, but each
+    % player has only one very strong intensity.
+    
+    
+    % Heterogeneity.
+    % hetMultiplier = 50;
+    % heterogeneity = hetMultiplier * randn(N,1);
+    
+    % Add heterogeneity of reference points.
+    % referencePoints(i) = max(0, referencePoints(i) + heterogeneity(i));    
     
 end
 
@@ -197,13 +269,7 @@ strategies_time = ones(N, T);
 %%%%%%%%%%%%%%%%%%
 
 for t = 1 : T
-    
-%     if (t == 2)
-%         mean(strategies_time(find(strategies_carbus(:,1) == CAR),1))
-%         std(strategies_time(find(strategies_carbus(:,1) == CAR),1))
-%         
-%     end
-    
+        
     if (phi > 0)        
         % Discount all propensities regardless of choice.
         % Notice that probabilities are unchanged here.
@@ -238,6 +304,7 @@ for t = 1 : T
         
     end
     
+    % Sort players by departure time.
     [~, sorted_players] = sort(strategies_time(:, t));
     
     % Compute payoffs, propensities and probabilities.
@@ -267,6 +334,7 @@ for t = 1 : T
             end
         end
         
+        
         payoffs(idx, t) = payoff;
         
         
@@ -275,9 +343,11 @@ for t = 1 : T
         % Erev Roth (basic or RE)        
             
         rho = referencePoints(idx);
-        reward = payoff - rho;
+        % Did I get more than what my reference point was?
+        % Bonus for getting a car (feels good!).
+        reward = (payoff - rho) + (choseCarGotCar * 40);
         
-        if (reward < 0 )
+        if (reward < 0)
             rho = (1 - wMinus) * rho + wMinus * payoff;
         else
             rho = (1 - wPlus) * rho + wPlus * payoff;
@@ -320,7 +390,7 @@ for t = 1 : T
             upToTarget = TIME_INTERVAL_DECREASE+1;
             
             if (reward)
-                increase_unit = abs(ownStrategyReward) / ...
+                increase_unit = 10 * abs(ownStrategyReward) / ...
                     (2 * TIME_INTERVAL_DECREASE);
                 
                 increases = increase_unit:increase_unit:increase_unit*upToTarget;
@@ -341,7 +411,7 @@ for t = 1 : T
                 newProp = propensities_time(idx, i);
                 
                 if (i < downLimit)
-                    newProp = newProp + otherReward;
+                    % newProp = newProp + otherReward;
                     
                 elseif (i >= downLimit && i <= timeTarget)
                     ii = ii + 1;
@@ -353,11 +423,12 @@ for t = 1 : T
                     newProp = newProp + increase;
                     
                 else
-                    newProp = newProp + otherReward;
+                    % newProp = newProp + otherReward;
                 end
                 
                 propensities_time(idx, i) = max(upsilon, newProp);
-                
+                % plot(propensities_time(idx, :));
+                % pause(0.2);
             end
             
         end
@@ -392,7 +463,7 @@ for t = 1 : T
         
     end
 
-    if (DEBUG)
+    if (0 && DEBUG)
         strategies_time
         propensities_carbus
         referencePoints
@@ -407,6 +478,7 @@ if (DEBUG)
     avgDepTimeCar = mean(strategies_time(carPlayers,t))
     propensities_carbus
     imagesc(propensities_time)
+    pause(0.4);
 end
 
 if (DUMP)

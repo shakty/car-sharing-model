@@ -24,9 +24,9 @@ PAYOFF_BUS = [ 50 70 ];
 
 %% Roth Erev model
 
-INCREASE_SHOCK = [5, 20, 40, 50, 60];
+INCREASE_SHOCK = [40];
 
-DECREASE_SHOCK = [1:5:61];
+DECREASE_SHOCK = [20];
 
 TIME_INTERVAL_DECREASE = 10;
 
@@ -40,12 +40,12 @@ phi = [0.001];
 S1 = 1;
 
 % Reference point at time 0 (baseline BUS_PAYOFF).
-rho1 = 0;
+rho1 = 100;
 
 % Weights assigned to positive and negative reinforcement.
 % How much new experience is weighted against old. (1 = only new).
-wPlus = 0.6;
-wMinus = 0.6;
+wPlus = 0.6; % When my reward exceeds expectation.
+wMinus = 0.6; % When my reward is below expectation.
 
 % Positive Constraint.
 upsilon = 0.0001;
@@ -76,7 +76,7 @@ end
 %% Save it!
 %%%%%%%%%%%
 
-simName = 'sweep_increase';
+simName = 'custom-time-init';
 
 save(['conf/' simName]);
 

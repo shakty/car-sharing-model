@@ -18,13 +18,13 @@ dumpDir = 'dump/';
 confDir = 'conf/';
 
 %% Loading Conf
-load([confDir 'sweep_increase'])
+load([confDir 'custom-time-init'])
 
 %% Modifying params locally.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-nRuns = 50;
-DUMP = 1;
+nRuns = 30;
+DUMP = 0;
 DEBUG = 0;
 
 compLocal = 1;
@@ -37,6 +37,18 @@ if (exist(clusterDir, 'dir') == 7)
 else
     comp = compLocal;
 end
+
+
+nRuns = 20;
+epsilon = 0.3;
+phi = 0.1;
+
+INCREASE_SHOCK = [20];
+DECREASE_SHOCK = [20];
+
+TIME_INTERVAL_DECREASE = 3;
+rho1 = 0;
+INIT_T1 = 1;
 
 % % Cars.
 % CAR_NUMBER = [ 15 ];
@@ -235,10 +247,10 @@ for i1=1:length(CAR_NUMBER)
                 else
                     paramObjs{taskIdx} = paramsObj;
                 end
-                
-                % Update simulation count.
-                simCount = simCount + 1;
+                                
             end
+            % Update simulation count.
+            simCount = simCount + 1;
             fprintf('\n\n');            
     end
     end
