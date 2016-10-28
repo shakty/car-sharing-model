@@ -75,12 +75,18 @@ wMinus = args.wMinus;
 upsilon = args.upsilon;
 
 % Rho1, bus relative.
-rho1 = PAYOFF_BUS + args.rho1;
+if (args.rho1_relative_to_bus)    
+    rho1 = PAYOFF_BUS + args.rho1;
+else
+    rho1 = args.rho1;
+end
+
 % Rho1, absolute.
 %rho1 = args.rho1;
 
-TIME_INTERVAL_DECREASE = args.TIME_INTERVAL_DECREASE;
+TIME_INTERVAL = args.TIME_INTERVAL;
 
+REWARD_GOT_CAR = args.REWARD_GOT_CAR;
 INCREASE_SHOCK = args.INCREASE_SHOCK;
 DECREASE_SHOCK = args.DECREASE_SHOCK;
 
@@ -101,7 +107,6 @@ for r = 1 : REPETITIONS
 
 % Clear simulation data.
     
-
 % Init initial propensities and probabilities. Equal for all strategies.
 
 % Initial propensities for car/bus for each strategy of each player.
@@ -131,9 +136,10 @@ if (INIT_T1)
     if (PAYOFF_BUS == 50)
         % Probability of taking the bus at round 1.
         PBUS = 0.2078721;
+        
         % Avg. departure time and standard deviation at round 1.
-        TCAR = 38.77484;
-        TCAR_SD = 20.68923;
+        % TCAR = 38.77484;
+        % TCAR_SD = 20.68923;
         
         % Distribution of departure times from experiment (counts).
         props = [ ...
@@ -143,14 +149,15 @@ if (INIT_T1)
             7   4 195 ...
         ];
     
-        time_distr = [  1 1 1 1 31 31 31 32 41 46 46 51 56 59 61 61 61 61 61 61 ];
+        % time_distr = [  1 1 1 1 31 31 31 32 41 46 46 51 56 59 61 61 61 61 61 61 ];
         
     else
         % Probability of taking the bus at round 1.
         PBUS = 0.3522868;
+        
         % Avg. departure time and standard deviation at round 1.
-        TCAR = 37.57252;
-        TCAR_SD = 21.82269;
+        % TCAR = 37.57252;
+        % TCAR_SD = 21.82269;
         
         % Distribution of departure times from experiment (counts).
         props = [ ...
@@ -161,9 +168,9 @@ if (INIT_T1)
         ];
     
         
-        time_distr = [ 1 1 1 21 31 31 31 41 46 46 51 56 61 61 61 61 61 61 61 ];
-        time_distr_last3 = [ 16 36 40 ];
-        time_distr = sort([ time_distr time_distr_last3(randi(3)) ]);
+        % time_distr = [ 1 1 1 21 31 31 31 41 46 46 51 56 61 61 61 61 61 61 61 ];
+        % time_distr_last3 = [ 16 36 40 ];
+        % time_distr = sort([ time_distr time_distr_last3(randi(3)) ]);
     
     end
     
@@ -177,14 +184,6 @@ if (INIT_T1)
     propensities_carbus(tmp,CAR) = S1;
     propensities_carbus(tmp,BUS) = propensities_carbus(tmp,BUS).*increase;
     
-%     % As from the experimental distribution across conditions. (counts).
-%     props = [ ...
-%         180   3   4   0   4   2   2   0   4   4   9   2   1   2  0   15   3   2   3   3  15   3 ...
-%           1   5   3   9   3   6   9   9 152  10   7   6   5  10   7   2   4  11  49 ...
-%           6   6   5  12 108   7   6   4   7  49   3  10   1   5  23   3   8  15   7 ...
-%         348 ...
-%     ];
-        
     
     % This snippet initializes ALL probabilities of EACH individual based
     % on the GLOBAL distribution of all the population.
@@ -241,22 +240,21 @@ if (INIT_T1)
 %         end
 %         timeIdx = timeIdx + 1;
 %     end    
-    
-    % This snippet initializes ONE probability among ALL for EACH
-    % individual. The GLOBAL distribution of all simulated players
-    % should look more or less like the experimental one, but each
-    % player has only one very strong intensity.
-    
-    
-    % Heterogeneity.
-    % hetMultiplier = 50;
-    % heterogeneity = hetMultiplier * randn(N,1);
-    
-    % Add heterogeneity of reference points.
-    % referencePoints(i) = max(0, referencePoints(i) + heterogeneity(i));    
-    
+         
 end
 
+
+% if (HETEROGENEITY)
+%     % TODO
+%     
+%     % Heterogeneity.
+%     % hetMultiplier = 50;
+%     % heterogeneity = hetMultiplier * randn(N,1);
+%     
+%     % Add heterogeneity of reference points.
+%     % referencePoints(i) = max(0, referencePoints(i) + heterogeneity(i));  
+%     
+% end
 
 % Store strategies, payoffs and choices over all rounds.
 payoffs = zeros(N, T);
@@ -345,7 +343,7 @@ for t = 1 : T
         rho = referencePoints(idx);
         % Did I get more than what my reference point was?
         % Bonus for getting a car (feels good!).
-        reward = (payoff - rho) + (choseCarGotCar * 40);
+        reward = (payoff - rho) + (choseCarGotCar * REWARD_GOT_CAR);
         
         if (reward < 0)
             rho = (1 - wMinus) * rho + wMinus * payoff;
@@ -384,14 +382,14 @@ for t = 1 : T
             end
             
             % Making sure limits are within 1 and 61.
-            downLimit = max(timeTarget - TIME_INTERVAL_DECREASE,1);
-            upLimit = min(timeTarget + TIME_INTERVAL_DECREASE, ...
+            downLimit = max(timeTarget - TIME_INTERVAL,1);
+            upLimit = min(timeTarget + TIME_INTERVAL, ...
                 nr_strategies_time);
-            upToTarget = TIME_INTERVAL_DECREASE+1;
+            upToTarget = TIME_INTERVAL+1;
             
             if (reward)
                 increase_unit = 10 * abs(ownStrategyReward) / ...
-                    (2 * TIME_INTERVAL_DECREASE);
+                    (2 * TIME_INTERVAL);
                 
                 increases = increase_unit:increase_unit:increase_unit*upToTarget;
                 startIncreases = (upToTarget+1)-length(downLimit:timeTarget);
@@ -506,7 +504,7 @@ if (DUMP)
     upsilons = repmat(upsilon, N*T, 1);
     increaseShocks = repmat(INCREASE_SHOCK, N*T, 1);
     decreaseShocks = repmat(DECREASE_SHOCK, N*T, 1);
-    intervals = repmat(TIME_INTERVAL_DECREASE, N*T, 1);
+    intervals = repmat(TIME_INTERVAL, N*T, 1);
         
     csvMatrix = [ ...
         inits, ...

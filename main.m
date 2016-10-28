@@ -18,14 +18,10 @@ dumpDir = 'dump/';
 confDir = 'conf/';
 
 %% Loading Conf
-load([confDir 'custom-time-init'])
+load([confDir 'new-deal'])
 
-%% Modifying params locally.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-nRuns = 30;
-DUMP = 0;
-DEBUG = 0;
+%% Computation type.
+%%%%%%%%%%%%%%%%%%%%
 
 compLocal = 1;
 compLSF = 2;
@@ -38,55 +34,24 @@ else
     comp = compLocal;
 end
 
+%% Modifying params locally.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-nRuns = 20;
-epsilon = 0.3;
-phi = 0.1;
+nRuns = 30;
+DUMP = 0;
+DEBUG = 0;
 
-INCREASE_SHOCK = [20];
-DECREASE_SHOCK = [20];
 
-TIME_INTERVAL_DECREASE = 3;
-rho1 = 0;
-INIT_T1 = 1;
-
-% % Cars.
-% CAR_NUMBER = [ 15 ];
-% % Payoffs.
-% PAYOFF_BUS = [ 50 ];
+% nRuns = 20;
+% epsilon = 0.3;
+% phi = 0.1;
 % 
-% INCREASE_SHOCK = 25;
+% INCREASE_SHOCK = [20];
+% DECREASE_SHOCK = [20];
 % 
-% DECREASE_SHOCK = 40;
-% 
-% TIME_INTERVAL_DECREASE = 10;
-% 
-% % Experimentation / Error.
-% epsilon = [0.2];
-% 
-% % Forgetting (or recency).
-% phi = [0.001];
-% 
-% % Strength of initial propensities.
-% S1 = 1;
-% 
-% % Reference point at time 0 (baseline BUS_PAYOFF).
+% TIME_INTERVAL_DECREASE = 3;
 % rho1 = 0;
-% 
-% % Weights assigned to positive and negative reinforcement.
-% % How much new experience is weighted against old. (1 = only new).
-% wPlus = 0.6;
-% wMinus = 0.6;
-% 
-% % Positive Constraint.
-% upsilon = 0.0001;
-% 
-% % Use data from experiment to set initial propensities and probabilities.
 % INIT_T1 = 1;
-
-
-% csvFile = '/home/stefano/Documents/mypapers/kay_car/data/ALL/summary_exp.csv';
-% exp = csvread(csvFile);
 
 %% Start Vectorization of Parameters Sets
 fprintf('\nStarting...\n');
@@ -141,8 +106,11 @@ for i1=1:length(CAR_NUMBER)
     for i2=1:length(PAYOFF_BUS)
         my_PAYOFF_BUS = PAYOFF_BUS(i2);        
                     
-    for i9=1:length(TIME_INTERVAL_DECREASE)
-        my_TIME_INTERVAL_DECREASE = TIME_INTERVAL_DECREASE(i9);           
+    for i9=1:length(TIME_INTERVAL)
+        my_TIME_INTERVAL = TIME_INTERVAL(i9);
+                
+    for i10=1:length(REWARD_GOT_CAR)
+        my_REWARD_GOT_CAR = REWARD_GOT_CAR(i10);
         
     for i12=1:length(INCREASE_SHOCK)
         my_INCREASE_SHOCK = INCREASE_SHOCK(i12);
@@ -161,6 +129,9 @@ for i1=1:length(CAR_NUMBER)
         
     for i17=1:length(rho1)
         my_rho1 = rho1(i17);
+        
+    for i17b=1:length(rho1_relative_to_bus)
+        my_rho1_relative_to_bus = rho1_relative_to_bus(i17b);
         
     for i18=1:length(wPlus)
         my_wPlus = wPlus(i18);
@@ -199,13 +170,15 @@ for i1=1:length(CAR_NUMBER)
                 'seed', seed, ...
                 'CAR_NUMBER', my_CAR_NUMBER, ...
                 'PAYOFF_BUS', my_PAYOFF_BUS, ...          
-                'TIME_INTERVAL_DECREASE', my_TIME_INTERVAL_DECREASE, ...
+                'TIME_INTERVAL', my_TIME_INTERVAL, ... 
+                'REWARD_GOT_CAR', my_REWARD_GOT_CAR, ...
                 'INCREASE_SHOCK', my_INCREASE_SHOCK, ...
                 'DECREASE_SHOCK', my_DECREASE_SHOCK, ...
                 'S1', my_S1, ...
                 'epsilon', my_epsilon, ...
                 'phi', my_phi, ...                
-                'rho1', my_rho1, ...
+                'rho1', my_rho1, ...           
+                'rho1_relative_to_bus', my_rho1_relative_to_bus, ...
                 'wPlus', my_wPlus, ...
                 'wMinus', my_wMinus, ...
                 'upsilon', my_upsilon ...
@@ -252,6 +225,8 @@ for i1=1:length(CAR_NUMBER)
             % Update simulation count.
             simCount = simCount + 1;
             fprintf('\n\n');            
+    end
+    end
     end
     end
     end

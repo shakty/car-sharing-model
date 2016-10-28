@@ -24,12 +24,6 @@ PAYOFF_BUS = [ 50 70 ];
 
 %% Roth Erev model
 
-INCREASE_SHOCK = [40];
-
-DECREASE_SHOCK = [20];
-
-TIME_INTERVAL_DECREASE = 10;
-
 % Experimentation / Error.
 epsilon = [0.2];
 
@@ -39,8 +33,11 @@ phi = [0.001];
 % Strength of initial propensities.
 S1 = 1;
 
-% Reference point at time 0 (baseline BUS_PAYOFF).
-rho1 = 100;
+% Reference point at time 0.
+rho1 = [ 0 10 20 30 40 50 60 70 80 90 100 ];
+
+% Make rho1 a parameter relative to BUS_PAYOFF (added to it).
+rho1_relative_to_bus = 0;
 
 % Weights assigned to positive and negative reinforcement.
 % How much new experience is weighted against old. (1 = only new).
@@ -49,6 +46,23 @@ wMinus = 0.6; % When my reward is below expectation.
 
 % Positive Constraint.
 upsilon = 0.0001;
+
+%% Adapting Roth Erev to Car-Sharing
+
+% The increase in target departure time if a car is gotten.
+INCREASE_SHOCK = [20];
+
+% The decrease in target departure time if the car is missed.
+DECREASE_SHOCK = [20];
+
+% The reward for having got a car if chosen car.
+REWARD_GOT_CAR = [0 40];
+
+% The propensities of departure times within
+% this interval (both + and -) are updated.
+TIME_INTERVAL = 10;
+
+%% Init
 
 % Use data from experiment to set initial propensities and probabilities.
 INIT_T1 = 1;
@@ -76,7 +90,7 @@ end
 %% Save it!
 %%%%%%%%%%%
 
-simName = 'custom-time-init';
+simName = 'new-deal';
 
 save(['conf/' simName]);
 
