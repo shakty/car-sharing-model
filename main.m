@@ -212,6 +212,8 @@ for i1=1:length(CAR_NUMBER)
                     
                     % Submit the job to the scheduler in batches
                     if (mod(taskCount, TASKS4JOB) == 0)
+                        fprintf('Starting Task %n with % jobs.\n', ...
+                                 taskCount, SIMS4TASK);
                         submit(j);
                         
                         % if (simCount ~= nSimulations)
@@ -248,9 +250,20 @@ for i1=1:length(CAR_NUMBER)
     end
 end
 
-if (comp == compParallel)
-    matlabpool close
+% Submit the left-over tasks.
+if (comp == compLSF)
+     % 1: it has always one last increment.
+    if (mod(taskCount, TASKS4JOB) ~= 1)
+        if (taskIdx ~= 0)
+            createTask(j, @wrappersim, 0, {{paramObjs}});
+        end
+    end
+    submit(j);
 end
+
+% if (comp == compParallel)
+%     matlabpool close
+% end
 
 fprintf('Execution completed correctly\n');
 % Exit Matlab when invoked from command line with -r option
