@@ -66,8 +66,6 @@ fclose(fileID);
 
 folderName = [ dumpDir uniqueSimName '/' ];
 
-return
-
 if (comp == compLSF)
     % How many sequential simulations in one task.
     SIMS4TASK = 10;

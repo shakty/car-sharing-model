@@ -17,7 +17,7 @@ nRuns = 10;
 CAR_NUMBER = [5 10 15 ]; % CAR_SHARE = 0.75;
 
 % Payoffs.
-PAYOFF_BUS = [ 70 ];
+PAYOFF_BUS = [ 50 70 ];
 
 %% Learning Variables.
 %%%%%%%%%%%%%%%%%%%%%%
@@ -90,7 +90,7 @@ end
 %% Save it!
 %%%%%%%%%%%
 
-simName = 'test70';
+simName = 'new-deal';
 
 save(['conf/' simName]);
 
