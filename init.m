@@ -34,15 +34,15 @@ phi = [0.001];
 S1 = 1;
 
 % Reference point at time 0.
-rho1 = [ 0 10 20 30 40 50 60 70 80 90 100 ];
+rho1 = [ 0 ];
 
 % Make rho1 a parameter relative to BUS_PAYOFF (added to it).
 rho1_relative_to_bus = 0;
 
 % Weights assigned to positive and negative reinforcement.
 % How much new experience is weighted against old. (1 = only new).
-wPlus = 0.6; % When my reward exceeds expectation.
-wMinus = 0.6; % When my reward is below expectation.
+wPlus = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]; % When my reward exceeds expectation.
+wMinus = 1; % When my reward is below expectation.
 
 % Positive Constraint.
 upsilon = 0.0001;
