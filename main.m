@@ -59,8 +59,14 @@ fprintf('\nStarting...\n');
 
 uniqueSimName = createSimName(simName, DUMP, dumpDir, 0);
 
+% Write file for R to read it.
+fileID = fopen('simName.R','a');
+fprintf(fileID,'SIM <- "%s"\n', uniqueSimName);
+fclose(fileID);
+
 folderName = [ dumpDir uniqueSimName '/' ];
 
+return
 
 if (comp == compLSF)
     % How many sequential simulations in one task.
