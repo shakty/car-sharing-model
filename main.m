@@ -38,7 +38,7 @@ end
 %% Modifying params locally.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-nRuns = 30;
+nRuns = 100;
 DUMP = 1;
 DEBUG = 0;
 FIT = 1;
@@ -211,7 +211,7 @@ for i1=1:length(CAR_NUMBER)
                     
                     % Submit the job to the scheduler in batches
                     if (mod(taskCount, TASKS4JOB) == 0)
-                        fprintf('Starting Task %d with % jobs.\n', ...
+                        fprintf('Starting Task %d with %d jobs.\n', ...
                                  taskCount, SIMS4TASK);
                         submit(j);
                         
