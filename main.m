@@ -7,6 +7,7 @@ clear
 clc
 
 dbstop if error
+% dbstop in main at 215
 
 %% Add other directories to path
 path(path,'util/'); % Help functions
@@ -210,7 +211,7 @@ for i1=1:length(CAR_NUMBER)
                     
                     % Submit the job to the scheduler in batches
                     if (mod(taskCount, TASKS4JOB) == 0)
-                        fprintf('Starting Task %n with % jobs.\n', ...
+                        fprintf('Starting Task %d with % jobs.\n', ...
                                  taskCount, SIMS4TASK);
                         submit(j);
                         
@@ -255,8 +256,8 @@ if (comp == compLSF)
         if (taskIdx ~= 0)
             createTask(j, @wrappersim, 0, {{paramObjs}});
         end
-    end
-    submit(j);
+        submit(j);
+    end   
 end
 
 % if (comp == compParallel)
