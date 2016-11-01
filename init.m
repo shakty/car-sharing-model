@@ -25,7 +25,7 @@ PAYOFF_BUS = [ 50 70 ];
 %% Roth Erev model
 
 % Experimentation / Error.
-epsilon = [0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1];
+epsilon = [0 0.02 0.04 0.06 0.08 0.1 0.12 0.14 0.16 0.18 0.2];
 
 % Forgetting (or recency).
 phi = [0.001];
