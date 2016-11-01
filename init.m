@@ -50,10 +50,10 @@ upsilon = 0.0001;
 %% Adapting Roth Erev to Car-Sharing
 
 % The increase in target departure time if a car is gotten.
-INCREASE_SHOCK = [22:2:60];
+INCREASE_SHOCK = [5];
 
 % The decrease in target departure time if the car is missed.
-DECREASE_SHOCK = [20];
+DECREASE_SHOCK = [0:2:60];
 
 % The reward for having got a car if chosen car.
 REWARD_GOT_CAR = [0 40];
