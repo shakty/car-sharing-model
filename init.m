@@ -25,10 +25,10 @@ PAYOFF_BUS = [ 50 70 ];
 %% Roth Erev model
 
 % Experimentation / Error.
-epsilon = [0 0.02 0.04 0.06 0.08 0.1 0.12 0.14 0.16 0.18 0.2];
+epsilon = 0;
 
 % Forgetting (or recency).
-phi = [0.001];
+phi = [0 0.001 0.005 0.01 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4];
 
 % Strength of initial propensities.
 S1 = 1;
