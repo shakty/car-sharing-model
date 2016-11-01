@@ -53,14 +53,14 @@ upsilon = 0.0001;
 INCREASE_SHOCK = [5];
 
 % The decrease in target departure time if the car is missed.
-DECREASE_SHOCK = [0:2:60];
+DECREASE_SHOCK = [5];
 
 % The reward for having got a car if chosen car.
 REWARD_GOT_CAR = [0 40];
 
 % The propensities of departure times within
 % this interval (both + and -) are updated.
-TIME_INTERVAL = 10;
+TIME_INTERVAL = 0:1:20;
 
 %% Init
 
