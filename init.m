@@ -25,7 +25,7 @@ PAYOFF_BUS = [ 50 70 ];
 %% Roth Erev model
 
 % Experimentation / Error.
-epsilon = [0.2];
+epsilon = [0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1];
 
 % Forgetting (or recency).
 phi = [0.001];
@@ -41,7 +41,7 @@ rho1_relative_to_bus = 0;
 
 % Weights assigned to positive and negative reinforcement.
 % How much new experience is weighted against old. (1 = only new).
-wPlus = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]; % When my reward exceeds expectation.
+wPlus = 1; % When my reward exceeds expectation.
 wMinus = 1; % When my reward is below expectation.
 
 % Positive Constraint.
