@@ -28,13 +28,13 @@ PAYOFF_BUS = [ 50 70 ];
 epsilon = 0;
 
 % Forgetting (or recency).
-phi = [0 0.001 0.005 0.01 0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4];
+phi = 0.01;
 
 % Strength of initial propensities.
 S1 = 1;
 
 % Reference point at time 0.
-rho1 = [ 0 ];
+rho1 = 0;
 
 % Make rho1 a parameter relative to BUS_PAYOFF (added to it).
 rho1_relative_to_bus = 0;
@@ -50,7 +50,7 @@ upsilon = 0.0001;
 %% Adapting Roth Erev to Car-Sharing
 
 % The increase in target departure time if a car is gotten.
-INCREASE_SHOCK = [20];
+INCREASE_SHOCK = [0 2 4 6 8 10 12 14 16 18 20];
 
 % The decrease in target departure time if the car is missed.
 DECREASE_SHOCK = [20];

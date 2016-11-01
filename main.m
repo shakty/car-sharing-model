@@ -43,7 +43,6 @@ DUMP = 1;
 DEBUG = 0;
 FIT = 1;
 
-
 % nRuns = 20;
 % epsilon = 0.3;
 % phi = 0.1;
@@ -209,16 +208,16 @@ for i1=1:length(CAR_NUMBER)
                     paramObjs{SIMS4TASK} = paramsObj;
                     createTask(j, @wrappersim, 0, {{paramObjs}});
                     
+                    jobIdx = mod(taskCount, TASKS4JOB) == 0;
                     % Submit the job to the scheduler in batches
-                    if (mod(taskCount, TASKS4JOB) == 0)
-                        fprintf('Starting Task %d with %d jobs.\n', ...
-                                 taskCount, SIMS4TASK);
+                    if (jobIdx == 0)
+                        fprintf('Starting Job %d with %d tasks with %d jobs.\n', ...
+                                 jobCount, TASKS4JOB, SIMS4TASK);
                         submit(j);
                         
-                        % if (simCount ~= nSimulations)
-                            j = createJob(sched);
-                            jobCount = jobCount + 1;
-                        % end
+                        % TODO: Should create a new job if it is the last one.
+                        j = createJob(sched);
+                        jobCount = jobCount + 1;
                         
                     end
                     
@@ -251,18 +250,22 @@ end
 
 % Submit the left-over tasks.
 if (comp == compLSF)
-     % 1: it has always one last increment.
-    if (mod(taskCount, TASKS4JOB) ~= 1)
+    remainingSims = mod((simCount - 1), TASKS4JOB*SIMS4TASK);
+    if (remainingSims ~= 0)
         if (taskIdx ~= 0)
             createTask(j, @wrappersim, 0, {{paramObjs}});
         end
+        
+        fprintf('Starting Last Job %d with %d jobs.\n', ...
+                                 jobCount, remainingSims);
         submit(j);
-    end   
+    end
+    
+elseif (comp == compParallel)
+     matlabpool close
 end
 
-% if (comp == compParallel)
-%     matlabpool close
-% end
+
 
 fprintf('Execution completed correctly\n');
 % Exit Matlab when invoked from command line with -r option
