@@ -31,7 +31,7 @@ epsilon = 0;
 phi = 0.01;
 
 % Strength of initial propensities.
-S1 = 1;
+S1 = 1:20;
 
 % Reference point at time 0.
 rho1 = 0;
@@ -60,7 +60,7 @@ REWARD_GOT_CAR = [0 40];
 
 % The propensities of departure times within
 % this interval (both + and -) are updated.
-TIME_INTERVAL = 0:1:20;
+TIME_INTERVAL = 10;
 
 %% Init
 
