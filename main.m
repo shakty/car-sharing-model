@@ -43,6 +43,8 @@ DUMP = 1;
 DEBUG = 0;
 FIT = 1;
 
+dryLSF = 0;
+
 % nRuns = 20;
 % epsilon = 0.3;
 % phi = 0.1;
@@ -85,16 +87,18 @@ if (comp == compLSF)
     % sched = parcluster();
     % sched = findResource('scheduler', 'type', 'local');
     
-    % Remote.
-    parallel.importProfile('/cluster/apps/matlab/support/BrutusLSF8h.settings')
-    sched = findResource('scheduler','type','lsf');
-    % sched=parcluster('BrutusLSF8h');
-    submitArgs = [' -W 1:00 -R "rusage[mem=2000]" -o ' logFolder '/' uniqueSimName '.log'];
-    % submitArgs = [' -W 8:00 -R "rusage[mem=2000]" '];
-    set(sched, 'SubmitArguments', submitArgs);
-    set(sched, 'DataLocation', [logFolder '/']);
-    
-    j = createJob(sched);
+    if (dryLSF ~= 1)
+        % Remote.
+        parallel.importProfile('/cluster/apps/matlab/support/BrutusLSF8h.settings')
+        sched = findResource('scheduler','type','lsf');
+        % sched=parcluster('BrutusLSF8h');
+        submitArgs = [' -W 1:00 -R "rusage[mem=2000]" -o ' logFolder '/' uniqueSimName '.log'];
+        % submitArgs = [' -W 8:00 -R "rusage[mem=2000]" '];
+        set(sched, 'SubmitArguments', submitArgs);
+        set(sched, 'DataLocation', [logFolder '/']);
+        
+        j = createJob(sched);
+    end
     
 elseif (comp == compParallel)
 
@@ -205,18 +209,26 @@ for i1=1:length(CAR_NUMBER)
                 taskIdx = mod(simCount, SIMS4TASK);
                 
                 if (taskIdx == 0)
-                    paramObjs{SIMS4TASK} = paramsObj;
-                    createTask(j, @wrappersim, 0, {{paramObjs}});
                     
-                    jobIdx = mod(taskCount, TASKS4JOB) == 0;
+                    paramObjs{SIMS4TASK} = paramsObj;
+                    
+                    if (dryLSF ~=1)
+                        createTask(j, @wrappersim, 0, {{paramObjs}});
+                    end
+                    
+                    jobIdx = mod(taskCount, TASKS4JOB);
                     % Submit the job to the scheduler in batches
                     if (jobIdx == 0)
                         fprintf('Starting Job %d with %d tasks with %d jobs.\n', ...
                                  jobCount, TASKS4JOB, SIMS4TASK);
-                        submit(j);
                         
-                        % TODO: Should create a new job if it is the last one.
-                        j = createJob(sched);
+                        if (dryLSF ~= 1)
+                            submit(j);
+                            % TODO: Should create a new job if it is the last one.
+                            j = createJob(sched);
+                        end
+                        
+                        % TODO: Should increment only it is the not last one.
                         jobCount = jobCount + 1;
                         
                     end
@@ -252,13 +264,15 @@ end
 if (comp == compLSF)
     remainingSims = mod((simCount - 1), TASKS4JOB*SIMS4TASK);
     if (remainingSims ~= 0)
-        if (taskIdx ~= 0)
+        if (taskIdx ~= 0 && dryLSF ~= 1)
             createTask(j, @wrappersim, 0, {{paramObjs}});
         end
         
         fprintf('Starting Last Job %d with %d jobs.\n', ...
                                  jobCount, remainingSims);
-        submit(j);
+        if (dryLSF ~= 1)
+            submit(j);
+        end
     end
     
 elseif (comp == compParallel)
