@@ -1,0 +1,548 @@
+function [ output_args ] = simulation_belief( args )
+%SIMULATION Summary of this function goes here
+%   Detailed explanation goes here
+
+
+%% Rules of the game.
+%%%%%%%%%%%%%%%%%%%%%
+
+% Nr Players.
+N = 20;
+
+% Timesteps.
+T = 30;
+
+% Strategies indexes.
+BUS = 1;
+CAR = 2;
+
+% Available strategies.
+avail_strategies_carbus = [ BUS CAR ];
+
+% Nr. available strategies each player each round.
+nr_strategies = length(avail_strategies_carbus);
+
+% Avail strategies for car (leaving from 10 to 11).
+avail_strategies_time = 0:60;
+
+% Nr available time strategies.
+nr_strategies_time = length(avail_strategies_time);
+% seed = args.seed;
+
+% Payoffs.
+PAYOFF_CAR = 30;
+SLOPE_CAR = (100 - PAYOFF_CAR) / 60;
+SLOPE_CAR_MISS = PAYOFF_CAR / 60;
+
+% N beliefs.
+
+% Shares of how many people I expect will take the BUS.
+bus_shares = [ 0.9 0.5 0.1 ];
+nr_beliefs_bus = length(bus_shares);
+
+% Upper limits of time interval for taking the CAR (associated to
+% likelihood of getting a car in that time interval).
+time_intervals_lowbound = [ 0, 12, 24, 36, 48 ] + 1;
+time_intervals_highbound = [ 12, 24, 36, 48, 60 ] + 1;
+
+time_intervals = [ time_intervals_lowbound ; time_intervals_highbound ];
+nr_beliefs_time = length(time_intervals);
+
+beliefs_times_distr           = [ 0.1 0.1 0.3 0.2 0.2 ];
+beliefs_times_distr_cumBefore = [ 0   0.1 0.2 0.5 0.8 ];
+beliefs_times_distr_cumAfter  = [ 0.9 0.8 0.4 0.2 0   ];
+
+%% Input Parameters.
+%%%%%%%%%%%%%%%%%%%%
+
+simCount = args.simCount;
+
+DUMP = args.DUMP;
+dumpDir = args.dumpDir;
+
+DEBUG = args.DEBUG;
+INIT_T1 = args.INIT_T1;
+
+% Game variables.
+
+PAYOFF_BUS = args.PAYOFF_BUS;
+CAR_NUMBER = args.CAR_NUMBER;
+
+if (CAR_NUMBER == 15)
+    car_level = 75;
+elseif (CAR_NUMBER == 10)
+    car_level = 50;
+else
+    car_level = 25;
+end
+
+
+
+REPETITIONS = args.nRuns;
+
+%% Fit params.
+FIT = args.FIT;
+if (FIT)
+    FIT_MEAN_COL = 5;
+    FIT_SD_COL = 6;
+    suffix = [ num2str(PAYOFF_BUS), '_', num2str(car_level), '.csv' ];
+    
+    fitBus = csvread(['fit/summary_bus_round_', suffix ]);    
+    fitDepTime = csvread(['fit/summary_deptime_round_', suffix ]);
+    % need to skip first row because it contains non-numbers (NA).
+    fitSwitch = csvread(['fit/summary_switch_round_', suffix ], 1, 0);
+    fitSwitch = [ 50 25 1 0 0 0 0 0 0 ; fitSwitch ];
+end
+
+%% Data structures for all repetitions.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% rep_nCars = zeros(REPETITIONS, 1);
+% rep_avgCarTime = zeros(REPETITIONS, 1);
+% rep_depCarTime = zeros(REPETITIONS, N);
+% rep_belief_carbus = zeros(N, 2, REPETITIONS);
+% rep_belief_time = zeros(N, nr_strategies_time, REPETITIONS);
+
+for r = 1 : REPETITIONS
+
+
+% Clear simulation data.
+
+
+% Init equal for all strategies.
+% T+1 so that we do not worry about the last iteration.
+
+% I believe that: the majority | half | the minority of people choose BUS.
+beliefs_bus = zeros(nr_beliefs_bus, (T+1), N);
+
+% Random beliefs at the beginning.
+y = rand(nr_beliefs_bus, N);
+y = y./repmat(sum(y,1),size(y,1),1);
+
+beliefs_bus(:,1,:) = y;
+
+
+% Same BUS beliefs for all now.
+%beliefs_bus(1,1,:) = 0.6;
+%beliefs_bus(2,1,:) = 0.3;
+%beliefs_bus(3,1,:) = 0.1;
+
+
+
+
+% Important! Now we are NOT updating beliefs about others' departure times.
+% I believe that: if I choose CAR, and pick time: 0-12, 13-24, 25-36,
+% 37-48, 49-60 I will get the CAR.
+% beliefs_times = zeros(nr_beliefs_time, (T+1), N);
+
+
+
+% Set initial belief and probabilities based on experimental data.
+if (INIT_T1) 
+
+    
+    % Custom init to do.
+         
+end
+
+% Store strategies, payoffs and choices over all rounds.
+payoffs = zeros(N, T);
+gotCars = zeros(N, T);
+strategies_carbus = ones(N, T);
+strategies_time = ones(N, T);
+
+if (DEBUG)
+    shareBus = zeros(T, 1);
+    meanDep = zeros(T, 1);
+end
+    
+if (FIT)
+    mseBus = zeros(T, 1);
+    mseTime = zeros(T, 1);
+    mseSwitch = zeros(T, 1);
+end
+
+%% One simulation.
+%%%%%%%%%%%%%%%%%%
+
+for t = 1 : T
+
+    if (FIT && t > 1)
+        strategy_switches = zeros(N,1);
+    end
+    
+    % TODO: Save probabilities.
+    probabilities_getcar = zeros(nr_beliefs_bus, nr_beliefs_time, N);
+    
+    for player = 1 : N
+        
+        %% Make choice of BUS/CAR and TIME.
+        
+        beliefs_player = beliefs_bus(:, t, player);
+        mostProbableBusBeliefIdx = find(beliefs_player == max(beliefs_player));
+        
+        % Changed to CAR if a profitable time interval for CAR is found.
+        curStrategy_carbus = BUS;
+        curStrategy_time = 0;
+        expCarPayoffFound = -1;
+        
+        for b = 1 : nr_beliefs_bus
+        
+            bus_share = bus_shares(b); 
+           
+            for j = 1 : nr_beliefs_time
+                
+                % Probability of getting a car =
+                % people who choose bus
+                % + 1/2 people who choose same time interval
+                % + people who departed after.
+                probGetCar = bus_share +  ...
+                    (1-bus_share) * (beliefs_times_distr(j) / 2 ) + ...
+                    (1-bus_share) * beliefs_times_distr_cumAfter(j);
+                
+                probabilities_getcar(b, j, player) = probGetCar;
+                
+                % We compute payoffs only for the most probable BUS prob.
+                if (b ~= mostProbableBusBeliefIdx)
+                    continue;
+                end
+                
+                
+                % Time target randomly selected in interval.
+                timeTarget = randi(time_intervals(:,j));
+                
+                expCarPayoff = PAYOFF_CAR + (SLOPE_CAR * timeTarget);
+                expCarPayoff = expCarPayoff * probGetCar;
+                
+                
+                probGetCar
+                b
+                timeTarget
+                expCarPayoff
+                
+                % Choose CAR if exp payoff is larger, or if equal with p=0.5.
+                % If current payoff is larger than previous found, or if
+                % equal with p=0.5, update.
+                if ((expCarPayoff > expCarPayoffFound || ...
+                        expCarPayoff == expCarPayoffFound && rand > 0.5) && ...
+                        (expCarPayoff > PAYOFF_BUS || ...
+                        expCarPayoff == PAYOFF_BUS && rand > 0.5))
+                    
+                    expCarPayoffFound = expCarPayoff;
+                    curStrategy_time = timeTarget;
+                    curStrategy_carbus = CAR;
+                    
+                end
+            end
+        end
+        
+%         % Crazy move.
+%         if (rand < 0.1)
+%             if (curStrategy_carbus == BUS) 
+%                 curStrategy_carbus = CAR;
+%                 curStrategy_time = randi(nr_strategies_time);
+%             else
+%                 curStrategy_carbus = BUS;
+%             end
+%         end
+        
+        if (FIT && t > 1)
+            if (curStrategy_carbus ~= strategies_carbus(player,(t-1)))
+                strategy_switches(player) = 1;
+            end
+        end
+        
+        % Store chosen strategies.
+        strategies_carbus(player, t) = curStrategy_carbus;
+        strategies_time(player, t) = curStrategy_time;
+        
+    end
+    
+    % Sort players by departure time.
+    [~, sorted_players] = sort(strategies_time(:, t));
+    
+    % Compute payoffs, belief and probabilities.
+    leftCars = CAR_NUMBER;
+    for player = 1 : N
+        
+        choseCarGotCar = 0;
+        choseBus = 0;
+        
+        idx = sorted_players(player);
+        
+        % BUS.
+        if (strategies_carbus(idx, t) == BUS)
+            payoff = PAYOFF_BUS;
+            choseBus = 1;
+            
+            % CAR.
+        else
+            time = strategies_time(idx, t);
+            if (leftCars > 0)
+                choseCarGotCar = 1;
+                gotCars(idx, t) = 1;
+                leftCars = leftCars - 1;
+                payoff = PAYOFF_CAR + (SLOPE_CAR * time);
+            else
+                payoff = PAYOFF_CAR - (SLOPE_CAR_MISS * time);
+            end
+        end        
+        
+        payoffs(idx, t) = payoff;        
+        
+        % Updating Beliefs.
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        player_beliefs = beliefs_bus(:, t, idx);
+        
+        if (choseBus == 1)            
+            % No update.
+            beliefs_bus(:, t+1, idx) = player_beliefs;
+            
+        % Car.
+        else
+            
+            % TODO: check here !
+            
+            for j = 1 : nr_beliefs_bus
+                
+                probGetCar = probabilities_getcar(j);
+                sumDataProb = sum(probabilities_getcar(j, :, idx));
+            
+                % Bayes Update.
+                if (choseCarGotCar)
+                    beliefs_bus(j, t+1, idx) = ...
+                        player_beliefs(j) * probGetCar / sumDataProb;
+                else
+                    sumDataProbNeg = (nr_beliefs_time) - sumDataProb;
+               
+                    beliefs_bus(j, t+1, idx) = ...
+                        player_beliefs(j) * (1 - probGetCar) / sumDataProbNeg;
+               end
+            end
+            
+        end
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        
+    end
+
+    if (DEBUG)
+        carPlayers = find(strategies_carbus(:,t) == CAR);
+        shareBus(t) = 20 - length(carPlayers);
+        meanDep(t) = mean(strategies_time(carPlayers,t));
+    end
+    
+    if (FIT)         
+        meanBus = length(find(strategies_carbus(:,t) == BUS)) / N;
+        meanSquaredErrBus = 100 * (fitBus(t, FIT_MEAN_COL) - meanBus)^2;
+        
+        meanTime = mean(strategies_time(find(strategies_carbus(:,t) == CAR)));
+        meanSquaredErrTime = 100 * (fitDepTime(t, FIT_MEAN_COL) - meanTime)^2;
+        
+        if (t ~= 1)
+            meanSwitch = mean(strategy_switches);
+            meanSquaredErrSwitch = 100 * (fitSwitch(t, FIT_MEAN_COL) - meanSwitch)^2;
+        else
+            meanSquaredErrSwitch = 0;
+        end
+        
+        mseBus(t) = meanSquaredErrBus;
+        mseTime(t) = meanSquaredErrTime;
+        mseSwitch(t) = meanSquaredErrSwitch;
+        
+    end
+    
+end
+
+if (DEBUG)
+    CAR_NUMBER
+    PAYOFF_BUS
+    carPlayers = find(strategies_carbus(:,t) == CAR);
+    nCars = length(carPlayers)
+    avgDepTimeCar = mean(strategies_time(carPlayers,t))
+    % pause(0.4);
+    
+    plot(1:30, shareBus);
+    plot(1:30, meanDep);
+    pause(0.5);
+    
+end
+
+if (DUMP)
+      
+    if (FIT)
+        
+        fileNameMse = [dumpDir 'mse_' int2str(simCount) '.csv'];
+        
+        rounds = (1:T)';
+        car_levels = repmat(car_level, T, 1);
+        bus_payoffs = repmat(PAYOFF_BUS, T, 1);
+        sessions = repmat(simCount, T, 1);
+        repetitions = repmat(r, T, 1);
+        
+        
+        inits = repmat(INIT_T1, T, 1);
+        rewardGotCars = repmat(REWARD_GOT_CAR, T, 1);
+        heteros = zeros(T, 1); % TODO: update if heterogeneity is used.
+        S1s = repmat(S1, T, 1);
+        epsilons = repmat(epsilon, T, 1);
+        phis = repmat(phi, T, 1);
+        rho1s = repmat(rho1, T, 1);
+        wPluss = repmat(wPlus, T, 1);
+        wMinuss = repmat(wMinus, T, 1);
+        upsilons = repmat(upsilon, T, 1);
+        increaseShocks = repmat(INCREASE_SHOCK, T, 1);
+        decreaseShocks = repmat(DECREASE_SHOCK, T, 1);
+        intervals = repmat(TIME_INTERVAL, T, 1);
+        
+        csvMatrix = [ ...
+            inits, ...
+            heteros, ...
+            rewardGotCars, ...
+            S1s, ...
+            epsilons, ...
+            phis, ...
+            rho1s, ...
+            wPluss, ...
+            wMinuss, ...
+            upsilons, ...
+            increaseShocks, ...
+            decreaseShocks, ...
+            intervals, ...
+            sessions, ...
+            repetitions, ...
+            bus_payoffs, ...
+            car_levels, ...
+            rounds, ...
+            mseBus, ...
+            mseTime, ...
+            mseSwitch
+        ];
+        
+        if (r == 1)
+             header = { ...
+            'init', ...
+            'hetero', ...
+            'reward.car', ...
+            'S1', ...
+            'epsilon', ...
+            'phi', ...
+            'rho1', ...
+            'wPlus', ...
+            'wMinus', ...
+            'upsilon', ...
+            'increase.shock', ...
+            'decrease.shock', ...
+            'interval', ...
+            'session', ...
+            'repetition', ...
+            'payoff.bus', ...
+            'car.level', ...
+            'round', ...
+            'msd.bus', ...
+            'msd.time', ...
+            'msd.switch' ...
+            };
+            
+            csvwrite_with_headers(fileNameMse, csvMatrix, header);
+        else            
+            dlmwrite(fileNameMse, csvMatrix,'-append','delimiter',',');
+        end
+    
+    else
+          fileName = [dumpDir 'data_' int2str(simCount) '.csv'];
+          
+          rounds = repmat((1:T)',N,1);
+          players = repmat(1:N, T, 1);
+          reshaped_carbus = reshape(strategies_carbus', N*T, 1);
+          reshaped_times = reshape(strategies_time', N*T, 1);
+          reshaped_gotCars = reshape(gotCars', N*T, 1);
+          reshaped_payoffs = reshape(payoffs', N*T, 1);
+          car_levels = repmat(car_level, N*T, 1);
+          bus_payoffs = repmat(PAYOFF_BUS, N*T, 1);
+          sessions = repmat(simCount, N*T, 1);
+          repetitions = repmat(r, N*T, 1);
+          
+          
+          inits = repmat(INIT_T1, N*T, 1);
+          rewardGotCars = repmat(REWARD_GOT_CAR, N*T, 1);
+          heteros = zeros(N*T, 1); % TODO: update if heterogeneity is used.
+          S1s = repmat(S1, N*T, 1);
+          epsilons = repmat(epsilon, N*T, 1);
+          phis = repmat(phi, N*T, 1);
+          rho1s = repmat(rho1, N*T, 1);
+          wPluss = repmat(wPlus, N*T, 1);
+          wMinuss = repmat(wMinus, N*T, 1);
+          upsilons = repmat(upsilon, N*T, 1);
+          increaseShocks = repmat(INCREASE_SHOCK, N*T, 1);
+          decreaseShocks = repmat(DECREASE_SHOCK, N*T, 1);
+          intervals = repmat(TIME_INTERVAL, N*T, 1);
+          
+          csvMatrix = [ ...
+              inits, ...
+              heteros, ...
+              rewardGotCars, ...
+              S1s, ...
+              epsilons, ...
+              phis, ...
+              rho1s, ...
+              wPluss, ...
+              wMinuss, ...
+              upsilons, ...
+              increaseShocks, ...
+              decreaseShocks, ...
+              intervals, ...
+              sessions, ...
+              repetitions, ...
+              bus_payoffs, ...
+              car_levels, ...
+              players(:), ...
+              rounds ...
+              reshaped_carbus ...
+              reshaped_times ...
+              reshaped_gotCars ...
+              reshaped_payoffs ...
+              ];
+          
+          
+          % Headers for repetition 1.
+          if (r == 1)
+              
+              header = { ...
+                  'init', ...
+                  'hetero', ...
+                  'reward.car', ...
+                  'S1', ...
+                  'epsilon', ...
+                  'phi', ...
+                  'rho1', ...
+                  'wPlus', ...
+                  'wMinus', ...
+                  'upsilon', ...
+                  'increase.shock', ...
+                  'decrease.shock', ...
+                  'interval', ...
+                  'session', ...
+                  'repetition', ...
+                  'payoff.bus', ...
+                  'car.level', ...
+                  'player', ...
+                  'round', ...
+                  'decision', ...
+                  'departure.time', ...
+                  'got.car', ...
+                  'payoff' ...
+                  };
+              
+              csvwrite_with_headers(fileName, csvMatrix, header);
+              
+              % Do not append headers.
+          else
+              dlmwrite(fileName, csvMatrix,'-append','delimiter',',');
+          end
+    end
+
+end        
+     
+
+end
+

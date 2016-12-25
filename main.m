@@ -39,8 +39,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 nRuns = 100;
-DUMP = 1;
-DEBUG = 0;
+DUMP = 0;
+DEBUG = 1;
 FIT = 1;
 
 dryLSF = 0;
@@ -49,12 +49,17 @@ dryLSF = 0;
 % epsilon = 0.3;
 % phi = 0.1;
 % 
-% INCREASE_SHOCK = [20];
-% DECREASE_SHOCK = [20];
+
+PAYOFF_BUS = 70;
+CAR_NUMBER = 15;
+
+INCREASE_SHOCK = [10];
+DECREASE_SHOCK = [10];
 % 
 % TIME_INTERVAL_DECREASE = 3;
 % rho1 = 0;
-% INIT_T1 = 1;
+
+INIT_T1 = 0;
 
 %% Start Vectorization of Parameters Sets
 fprintf('\nStarting...\n');
@@ -151,7 +156,6 @@ for i1=1:length(CAR_NUMBER)
     for i20=1:length(upsilon)
         my_upsilon = upsilon(i20);
          
-          
             % Defining seed
             if (seedtype == seed_machinetime)
                 % Set seed with milliseconds
@@ -201,7 +205,7 @@ for i1=1:length(CAR_NUMBER)
             
             
             if (comp == compLocal)        
-                simulation(paramsObj);
+                simulation_belief(paramsObj);
             else
                 % It is convenient to group together more simulations in one
                 % task if simulations are short. Matlab overhead to start on
