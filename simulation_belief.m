@@ -109,7 +109,7 @@ for r = 1 : REPETITIONS
 % Clear simulation data.
 
 
-% Init equal for all strategies.
+% Init RANDOM for all strategies.
 % T+1 so that we do not worry about the last iteration.
 
 % I believe that: the majority | half | the minority of people choose BUS.
@@ -150,6 +150,7 @@ payoffs = zeros(N, T);
 gotCars = zeros(N, T);
 strategies_carbus = ones(N, T);
 strategies_time = ones(N, T);
+strategies_time_interval = ones(N, T);
 
 if (DEBUG)
     shareBus = zeros(T, 1);
@@ -184,6 +185,7 @@ for t = 1 : T
         % Changed to CAR if a profitable time interval for CAR is found.
         curStrategy_carbus = BUS;
         curStrategy_time = 0;
+        curTimeInterval = 0;
         expCarPayoffFound = -1;
         
         for b = 1 : nr_beliefs_bus
@@ -214,11 +216,12 @@ for t = 1 : T
                 expCarPayoff = PAYOFF_CAR + (SLOPE_CAR * timeTarget);
                 expCarPayoff = expCarPayoff * probGetCar;
                 
-                
-                probGetCar
-                b
-                timeTarget
-                expCarPayoff
+                if (DEBUG)
+                    probGetCar
+                    b
+                    timeTarget
+                    expCarPayoff
+                end
                 
                 % Choose CAR if exp payoff is larger, or if equal with p=0.5.
                 % If current payoff is larger than previous found, or if
@@ -231,6 +234,7 @@ for t = 1 : T
                     expCarPayoffFound = expCarPayoff;
                     curStrategy_time = timeTarget;
                     curStrategy_carbus = CAR;
+                    curTimeInterval = b;
                     
                 end
             end
@@ -255,6 +259,7 @@ for t = 1 : T
         % Store chosen strategies.
         strategies_carbus(player, t) = curStrategy_carbus;
         strategies_time(player, t) = curStrategy_time;
+        strategies_time_interval(player, t) = curTimeInterval;
         
     end
     
@@ -301,25 +306,28 @@ for t = 1 : T
         % Car.
         else
             
-            % TODO: check here !
+            % Given the time interval chosen and if we found a car or not
+            % we update the beliefs all car/bus levels.
+            chosenInterval = strategies_time_interval(idx, t);
+            sumDataProb = 0;
             
-            for j = 1 : nr_beliefs_bus
+            for b = 1 : nr_beliefs_bus
                 
-                probGetCar = probabilities_getcar(j);
-                sumDataProb = sum(probabilities_getcar(j, :, idx));
-            
+                probGetCar = probabilities_getcar(b, chosenInterval, idx);
+                
                 % Bayes Update.
                 if (choseCarGotCar)
-                    beliefs_bus(j, t+1, idx) = ...
-                        player_beliefs(j) * probGetCar / sumDataProb;
+                    probGivenEvidence = player_beliefs(b) * probGetCar;
+                    beliefs_bus(b, t+1, idx) = probGivenEvidence;
                 else
-                    sumDataProbNeg = (nr_beliefs_time) - sumDataProb;
+                    probGivenEvidence = player_beliefs(b) * (1 - probGetCar);
+                    beliefs_bus(b, t+1, idx) = probGivenEvidence;
+                end
                
-                    beliefs_bus(j, t+1, idx) = ...
-                        player_beliefs(j) * (1 - probGetCar) / sumDataProbNeg;
-               end
+                sumDataProb = sumDataProb + probGivenEvidence;
             end
             
+            beliefs_bus(:, t+1, idx) ./ sumDataProb;
         end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
