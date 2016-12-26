@@ -76,7 +76,8 @@ else
     car_level = 25;
 end
 
-
+% Exploration.
+epsilon = args.epsilon;
 
 REPETITIONS = args.nRuns;
 
@@ -215,7 +216,7 @@ for t = 1 : T
                 expCarPayoff = PAYOFF_CAR + (SLOPE_CAR * timeTarget);
                 expCarPayoff = expCarPayoff * probGetCar;
                 
-                if (DEBUG)
+                if (0 && DEBUG)
                     probGetCar
                     b
                     timeTarget
@@ -233,21 +234,24 @@ for t = 1 : T
                     expCarPayoffFound = expCarPayoff;
                     curStrategy_time = timeTarget;
                     curStrategy_carbus = CAR;
-                    curTimeInterval = b;
+                    curTimeInterval = j;
                     
                 end
             end
         end
         
-%         % Crazy move.
-%         if (rand < 0.1)
-%             if (curStrategy_carbus == BUS) 
-%                 curStrategy_carbus = CAR;
-%                 curStrategy_time = randi(nr_strategies_time);
-%             else
-%                 curStrategy_carbus = BUS;
-%             end
-%         end
+        % Crazy move.
+        if (rand < epsilon)
+            if (curStrategy_carbus == BUS) 
+                curStrategy_carbus = CAR;
+                curTimeInterval = randi(nr_beliefs_time);
+                curStrategy_time = randi(time_intervals(:,curTimeInterval));
+                
+                % curStrategy_time = randi(nr_strategies_time);
+            else
+                curStrategy_carbus = BUS;
+            end
+        end
         
         if (FIT && t > 1)
             if (curStrategy_carbus ~= strategies_carbus(player,(t-1)))
@@ -328,7 +332,9 @@ for t = 1 : T
             
             beliefs_bus(:, t+1, idx) = beliefs_bus(:, t+1, idx) ./ sumDataProb;
             
-            if (sum(beliefs_bus(:, t+1, idx)) ~= 1)
+            if (sum(beliefs_bus(:, t+1, idx)) < 0.99 || ...
+                sum(beliefs_bus(:, t+1, idx)) > 1.01)
+                
                 beliefs_bus(:, t+1, idx)
             end
             

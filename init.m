@@ -25,13 +25,13 @@ PAYOFF_BUS = [ 50 70 ];
 %% Roth Erev model
 
 % Experimentation / Error.
-epsilon = 0;
+epsilon = 0.1;
 
 % Forgetting (or recency).
 phi = 0.01;
 
 % Strength of initial propensities.
-S1 = 1:20;
+S1 = 1;
 
 % Reference point at time 0.
 rho1 = 0;
@@ -56,7 +56,7 @@ INCREASE_SHOCK = [5];
 DECREASE_SHOCK = [5];
 
 % The reward for having got a car if chosen car.
-REWARD_GOT_CAR = [0 40];
+REWARD_GOT_CAR = [0];
 
 % The propensities of departure times within
 % this interval (both + and -) are updated.

@@ -38,7 +38,7 @@ end
 %% Modifying params locally.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-nRuns = 100;
+nRuns = 1;
 DUMP = 0;
 DEBUG = 1;
 FIT = 1;
@@ -46,15 +46,15 @@ FIT = 1;
 dryLSF = 0;
 
 % nRuns = 20;
-% epsilon = 0.3;
+epsilon = 0.1;
 % phi = 0.1;
-% 
 
-PAYOFF_BUS = 70;
-CAR_NUMBER = 15;
 
-INCREASE_SHOCK = [10];
-DECREASE_SHOCK = [10];
+% PAYOFF_BUS = [ 70 50 ];
+% CAR_NUMBER = [ 15 10 5 ];
+
+% INCREASE_SHOCK = [10];
+% DECREASE_SHOCK = [10];
 % 
 % TIME_INTERVAL_DECREASE = 3;
 % rho1 = 0;
