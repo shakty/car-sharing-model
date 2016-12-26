@@ -172,7 +172,6 @@ for t = 1 : T
         strategy_switches = zeros(N,1);
     end
     
-    % TODO: Save probabilities.
     probabilities_getcar = zeros(nr_beliefs_bus, nr_beliefs_time, N);
     
     for player = 1 : N
@@ -327,7 +326,12 @@ for t = 1 : T
                 sumDataProb = sumDataProb + probGivenEvidence;
             end
             
-            beliefs_bus(:, t+1, idx) ./ sumDataProb;
+            beliefs_bus(:, t+1, idx) = beliefs_bus(:, t+1, idx) ./ sumDataProb;
+            
+            if (sum(beliefs_bus(:, t+1, idx)) ~= 1)
+                beliefs_bus(:, t+1, idx)
+            end
+            
         end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
