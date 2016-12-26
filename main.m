@@ -19,7 +19,7 @@ dumpDir = 'dump/';
 confDir = 'conf/';
 
 %% Loading Conf
-load([confDir 'new-deal'])
+load([confDir 'belief'])
 
 %% Computation type.
 %%%%%%%%%%%%%%%%%%%%
