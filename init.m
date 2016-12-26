@@ -7,7 +7,7 @@ clear
 
 %% Simulation stuff.
 
-nRuns = 10;
+nRuns = 100;
 
 
 %% Variables for the game.
@@ -25,7 +25,7 @@ PAYOFF_BUS = [ 50 70 ];
 %% Roth Erev model
 
 % Experimentation / Error.
-epsilon = 0.1;
+epsilon = 0:0.05:1;
 
 % Forgetting (or recency).
 phi = 0.01;
@@ -90,7 +90,7 @@ end
 %% Save it!
 %%%%%%%%%%%
 
-simName = 'new-deal';
+simName = 'belief';
 
 save(['conf/' simName]);
 

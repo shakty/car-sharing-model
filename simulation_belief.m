@@ -374,6 +374,10 @@ end
 if (DEBUG)
     CAR_NUMBER
     PAYOFF_BUS
+    if (CAR_NUMBER == 10 && PAYOFF_BUS == 50)
+        pause(0.1);
+    end
+    
     carPlayers = find(strategies_carbus(:,t) == CAR);
     nCars = length(carPlayers)
     avgDepTimeCar = mean(strategies_time(carPlayers,t))

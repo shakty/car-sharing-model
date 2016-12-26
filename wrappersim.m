@@ -4,7 +4,7 @@ function wrappersim( paramArgs )
     path(path,'util/'); % Help functions
 
     for i=1:length(paramArgs)
-        simulation(paramArgs{i})
+        simulation_belief(paramArgs{i})
     end
 
 end

@@ -38,15 +38,15 @@ end
 %% Modifying params locally.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-nRuns = 1;
-DUMP = 0;
-DEBUG = 1;
+% nRuns = 1;
+DUMP = 1;
+DEBUG = 0;
 FIT = 1;
 
 dryLSF = 0;
 
 % nRuns = 20;
-epsilon = 0.1;
+% epsilon = 0.1;
 % phi = 0.1;
 
 
