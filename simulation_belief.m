@@ -76,8 +76,30 @@ else
     car_level = 25;
 end
 
-% Exploration.
+% Erev Roth.
+
+S1 = args.S1;
 epsilon = args.epsilon;
+phi = args.phi;
+wPlus = args.wPlus;
+wMinus = args.wMinus;
+upsilon = args.upsilon;
+
+% Rho1, bus relative.
+if (args.rho1_relative_to_bus)    
+    rho1 = PAYOFF_BUS + args.rho1;
+else
+    rho1 = args.rho1;
+end
+
+% Rho1, absolute.
+%rho1 = args.rho1;
+
+TIME_INTERVAL = args.TIME_INTERVAL;
+
+REWARD_GOT_CAR = args.REWARD_GOT_CAR;
+INCREASE_SHOCK = args.INCREASE_SHOCK;
+DECREASE_SHOCK = args.DECREASE_SHOCK;
 
 REPETITIONS = args.nRuns;
 
