@@ -40,7 +40,7 @@ end
 
 % nRuns = 1;
 DUMP = 1;
-DEBUG = 1;
+DEBUG = 0;
 FIT = 1;
 
 dryLSF = 0;
