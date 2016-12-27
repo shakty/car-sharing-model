@@ -40,7 +40,7 @@ end
 
 % nRuns = 1;
 DUMP = 1;
-DEBUG = 0;
+DEBUG = 1;
 FIT = 1;
 
 dryLSF = 0;
@@ -59,7 +59,7 @@ dryLSF = 0;
 % TIME_INTERVAL_DECREASE = 3;
 % rho1 = 0;
 
-INIT_T1 = 0;
+% INIT_T1 = 1;
 
 %% Start Vectorization of Parameters Sets
 fprintf('\nStarting...\n');

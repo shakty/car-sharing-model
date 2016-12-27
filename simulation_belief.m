@@ -163,10 +163,45 @@ beliefs_bus(:,1,:) = y;
 % Set initial belief and probabilities based on experimental data.
 if (INIT_T1) 
 
+    if (PAYOFF_BUS == 50)
+        % Probability of taking the bus at round 1.
+        PBUS = 0.2078721;
+        
+        % Avg. departure time and standard deviation at round 1.
+        TCAR = 38.77484;
+        TCAR_SD = 20.68923;
+        
+
+        
+    else
+        % Probability of taking the bus at round 1.
+        PBUS = 0.3522868;
+        
+        % Avg. departure time and standard deviation at round 1.
+        TCAR = 37.57252;
+        TCAR_SD = 21.82269;
+      
     
-    % Custom init to do.
-         
+    end
+    
+    
+    
+    % Sort the probabilities of each player so to make a clear belief
+    % that most people will take CAR or BUS.
+    for i=1:N
+        if (rand < PBUS)
+            % Probabilities that other people take bus in this shares: 
+            % 0.9, 0.5, 0.1
+            beliefs_bus(:,1,i) = sort(beliefs_bus(:,1,i), 1, 'descend');
+        else
+            beliefs_bus(:,1,i) = sort(beliefs_bus(:,1,i), 1, 'ascend');
+        end
+    end    
+   
+    % Check.
+    % sum(beliefs_bus(1,1,:) > beliefs_bus(3,1,:))
 end
+
 
 % Store strategies, payoffs and choices over all rounds.
 payoffs = zeros(N, T);
