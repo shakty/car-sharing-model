@@ -37,13 +37,13 @@ SLOPE_CAR_MISS = PAYOFF_CAR / 60;
 % N beliefs.
 
 % Shares of how many people I expect will take the BUS.
-bus_shares = [ 0.9 0.5 0.1 ];
+bus_shares = [ 0.9 0.7 0.5 0.3 0.1 ];
 nr_beliefs_bus = length(bus_shares);
 
 % Upper limits of time interval for taking the CAR (associated to
 % likelihood of getting a car in that time interval).
-time_intervals_lowbound = [ 0, 12, 24, 36, 48 ] + 1;
-time_intervals_highbound = [ 12, 24, 36, 48, 60 ] + 1;
+time_intervals_lowbound = [ 0, 12, 24, 36, 48 ];
+time_intervals_highbound = [ 12, 24, 36, 48, 60 ];
 
 time_intervals = [ time_intervals_lowbound ; time_intervals_highbound ];
 nr_beliefs_time = length(time_intervals);
@@ -115,6 +115,9 @@ if (FIT)
     % need to skip first row because it contains non-numbers (NA).
     fitSwitch = csvread(['fit/summary_switch_round_', suffix ], 1, 0);
     fitSwitch = [ 50 25 1 0 0 0 0 0 0 ; fitSwitch ];
+    
+    fitPayoffAdj = csvread(['fit/summary_payoff-adj_round_', suffix ]); 
+    fitPayoffAdjCar = csvread(['fit/summary_payoff-adj-car_round_', suffix ]); 
 end
 
 %% Data structures for all repetitions.
@@ -190,11 +193,22 @@ if (INIT_T1)
     % that most people will take CAR or BUS.
     for i=1:N
         if (rand < PBUS)
-            % Probabilities that other people take bus in this shares: 
-            % 0.9, 0.5, 0.1
-            beliefs_bus(:,1,i) = sort(beliefs_bus(:,1,i), 1, 'descend');
-        else
+            % Probabilities that other people take bus in these shares: 
+            % 0.9, 0.7, 0.5, 0.3, 0.1
             beliefs_bus(:,1,i) = sort(beliefs_bus(:,1,i), 1, 'ascend');
+            if (rand > 0.5)
+               tmp = beliefs_bus(end,1,i);
+               beliefs_bus(end,1,i) = beliefs_bus((end-1),1,i);
+               beliefs_bus((end-1),1,i) = tmp;
+            end
+            
+        else
+            beliefs_bus(:,1,i) = sort(beliefs_bus(:,1,i), 1, 'descend');          
+            if (rand > 0.5)
+               tmp = beliefs_bus(1,1,i);
+               beliefs_bus(1,1,i) = beliefs_bus(2,1,i);
+               beliefs_bus(2,1,i) = tmp;
+            end
         end
     end    
    
@@ -219,6 +233,14 @@ if (FIT)
     mseBus = zeros(T, 1);
     mseTime = zeros(T, 1);
     mseSwitch = zeros(T, 1);
+    msePayoffAdj = zeros(T, 1);
+    msePayoffAdjCar = zeros(T, 1);
+    
+    meanBusShare = zeros(T, 1);
+    meanDepTime = zeros(T, 1);
+    meanSwitches = zeros(T, 1);
+    meanPayoffAdj = zeros(T, 1);
+    meanPayoffAdjCar = zeros(T, 1);
 end
 
 %% One simulation.
@@ -407,22 +429,40 @@ for t = 1 : T
     end
     
     if (FIT)         
-        meanBus = length(find(strategies_carbus(:,t) == BUS)) / N;
+        nBusTakers = length(find(strategies_carbus(:,t) == BUS));
+        meanBus = nBusTakers / N;
         meanSquaredErrBus = 100 * (fitBus(t, FIT_MEAN_COL) - meanBus)^2;
         
-        meanTime = mean(strategies_time(find(strategies_carbus(:,t) == CAR)));
+        carTakers = find(strategies_carbus(:,t) == CAR);
+        meanTime = mean(strategies_time(carTakers));
         meanSquaredErrTime = 100 * (fitDepTime(t, FIT_MEAN_COL) - meanTime)^2;
+        
+        carPayoffs = payoffs(carTakers, t);
+        curMeanPayoffAdj = (50 * nBusTakers + sum(carPayoffs)) / N ;
+        curMeanPayoffAdjCar = mean(carPayoffs);
+        
+        meanSquaredErrPayoffAdj = 100 * (fitPayoffAdj(t, FIT_MEAN_COL) - curMeanPayoffAdj)^2;
+        meanSquaredErrPayoffAdjCar = 100 * (fitPayoffAdjCar(t, FIT_MEAN_COL) - curMeanPayoffAdjCar)^2;
         
         if (t ~= 1)
             meanSwitch = mean(strategy_switches);
             meanSquaredErrSwitch = 100 * (fitSwitch(t, FIT_MEAN_COL) - meanSwitch)^2;
         else
+            meanSwitch = 0;
             meanSquaredErrSwitch = 0;
         end
+                
+        meanBusShare(t) = meanBus;
+        meanDepTime(t) = meanTime;
+        meanSwitches(t) = meanSwitch;
+        meanPayoffAdj(t) = curMeanPayoffAdj;
+        meanPayoffAdjCar(t) = curMeanPayoffAdjCar;
         
         mseBus(t) = meanSquaredErrBus;
         mseTime(t) = meanSquaredErrTime;
         mseSwitch(t) = meanSquaredErrSwitch;
+        msePayoffAdj(t) = meanSquaredErrPayoffAdj;
+        msePayoffAdjCar(t) = meanSquaredErrPayoffAdjCar;
         
     end
     
@@ -492,9 +532,16 @@ if (DUMP)
             bus_payoffs, ...
             car_levels, ...
             rounds, ...
+            meanBusShare, ...
+            meanDepTime, ...
+            meanSwitches, ...
+            meanPayoffAdj, ...
+            meanPayoffAdjCar, ...
             mseBus, ...
             mseTime, ...
-            mseSwitch
+            mseSwitch, ...
+            msePayoffAdj, ...
+            msePayoffAdjCar ...
         ];
         
         if (r == 1)
@@ -517,9 +564,16 @@ if (DUMP)
             'payoff.bus', ...
             'car.level', ...
             'round', ...
+            'bus', ...
+            'departure.time', ...
+            'decision.switch', ...
+            'payoff.adjusted', ...
+            'payoff.adjusted.car', ...
             'msd.bus', ...
             'msd.time', ...
-            'msd.switch' ...
+            'msd.switch', ...
+            'msd.payoff.adjusted', ...
+            'msd.payoff.adjusted.car'
             };
             
             csvwrite_with_headers(fileNameMse, csvMatrix, header);
