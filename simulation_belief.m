@@ -144,24 +144,21 @@ beliefs_bus = zeros(nr_beliefs_bus, (T+1), N);
 % Random beliefs at the beginning.
 y = rand(nr_beliefs_bus, N);
 y = y./repmat(sum(y,1),size(y,1),1);
-
 beliefs_bus(:,1,:) = y;
-
-
-% Same BUS beliefs for all now.
-%beliefs_bus(1,1,:) = 0.6;
-%beliefs_bus(2,1,:) = 0.3;
-%beliefs_bus(3,1,:) = 0.1;
-
-
 
 
 % Important! Now we are NOT updating beliefs about others' departure times.
 % I believe that: if I choose CAR, and pick time: 0-12, 13-24, 25-36,
 % 37-48, 49-60 I will get the CAR.
 % beliefs_times = zeros(nr_beliefs_time, (T+1), N);
+y  = rand(nr_beliefs_time, N);
+y = y./repmat(sum(y,1),size(y,1),1);
+beliefs_times_distr = y;
 
-
+beliefs_times_distr_cumBefore = cumsum(beliefs_times_distr) - beliefs_times_distr;
+flipped_beliefs_time = flipud(beliefs_times_distr)
+beliefs_times_distr_cumAfter = cumsum(flipped_beliefs_time) - flipped_beliefs_time;
+beliefs_times_distr_cumAfter = flipud(beliefs_times_distr_cumAfter);
 
 % Set initial belief and probabilities based on experimental data.
 if (INIT_T1) 
@@ -278,8 +275,8 @@ for t = 1 : T
                 % + 1/2 people who choose same time interval
                 % + people who departed after.
                 probGetCar = bus_share +  ...
-                    (1-bus_share) * (beliefs_times_distr(j) / 2 ) + ...
-                    (1-bus_share) * beliefs_times_distr_cumAfter(j);
+                    (1-bus_share) * (beliefs_times_distr(j, player) / 2 ) + ...
+                    (1-bus_share) * beliefs_times_distr_cumAfter(j, player);
                 
                 probabilities_getcar(b, j, player) = probGetCar;
                 
