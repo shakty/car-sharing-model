@@ -320,7 +320,7 @@ for t = 1 : T
         end
         
         % Crazy move.
-        if (rand < epsilon)
+        if (rand < (epsilon/t))
             if (curStrategy_carbus == BUS) 
                 curStrategy_carbus = CAR;
                 curTimeInterval = randi(nr_beliefs_time);
@@ -480,8 +480,8 @@ if (DEBUG)
     avgDepTimeCar = mean(strategies_time(carPlayers,t))
     % pause(0.4);
     
-    plot(1:30, shareBus);
-    plot(1:30, meanDep);
+    plot(1:T, shareBus);
+    plot(1:T, meanDep);
     pause(0.5);
     
 end

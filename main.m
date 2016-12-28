@@ -46,7 +46,7 @@ FIT = 1;
 dryLSF = 0;
 
 % nRuns = 20;
-% epsilon = 0.1;
+%epsilon = 0.4;
 % phi = 0.1;
 
 
