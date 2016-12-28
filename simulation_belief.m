@@ -156,7 +156,7 @@ y = y./repmat(sum(y,1),size(y,1),1);
 beliefs_times_distr = y;
 
 beliefs_times_distr_cumBefore = cumsum(beliefs_times_distr) - beliefs_times_distr;
-flipped_beliefs_time = flipud(beliefs_times_distr)
+flipped_beliefs_time = flipud(beliefs_times_distr);
 beliefs_times_distr_cumAfter = cumsum(flipped_beliefs_time) - flipped_beliefs_time;
 beliefs_times_distr_cumAfter = flipud(beliefs_times_distr_cumAfter);
 
@@ -206,7 +206,10 @@ if (INIT_T1)
                beliefs_bus(1,1,i) = beliefs_bus(2,1,i);
                beliefs_bus(2,1,i) = tmp;
             end
+            
         end
+        
+        
     end    
    
     % Check.
@@ -291,6 +294,8 @@ for t = 1 : T
                 
                 expCarPayoff = PAYOFF_CAR + (SLOPE_CAR * timeTarget);
                 expCarPayoff = expCarPayoff * probGetCar;
+                
+                expCarPayoff = expCarPayoff + (randi([-30 30]) / t);
                 
                 if (0 && DEBUG)
                     probGetCar
